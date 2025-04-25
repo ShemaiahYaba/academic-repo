@@ -1,6 +1,6 @@
 // routes/PublicRoutes.tsx
 import { Route } from "react-router-dom";
-import AuthForm from "../pages/AuthForm";
+import AuthForm from "@/pages/AuthForm";
 
 const PublicRoutes = () => (
   <>

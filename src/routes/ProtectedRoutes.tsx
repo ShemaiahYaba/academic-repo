@@ -1,17 +1,19 @@
 // routes/ProtectedRoutes.tsx
 import { Route } from "react-router-dom";
-import Layout from "../components/Layout";
-import Home from "../pages/Home";
-import Journals from "../pages/Journals";
-import Articles from "../pages/Articles";
-import Post from "../pages/Post";
-import EditorialTeam from "../pages/EditorialTeam";
-import About from "../pages/About";
-import JournalDetail from "../pages/Journal/JournalDetails";
-import Notification from "../pages/Notification";
-import Profile from "../pages/Profile/Profile";
-import Support from "../pages/Support";
-import UploadJournal from "../pages/Journal/UploadJournal";
+import Layout from "@/components/Layout";
+import { lazy } from "react";
+
+const Home = lazy(() => import("@/pages/Home"));
+const Journals = lazy(() => import("@/pages/Journals"));
+const Articles = lazy(() => import("@/pages/Articles"));
+const Post = lazy(() => import("@/pages/Post"));
+const EditorialTeam = lazy(() => import("@/pages/EditorialTeam"));
+const About = lazy(() => import("@/pages/About"));
+const JournalDetail = lazy(() => import("@/pages/Journal/JournalDetails"));
+const Notification = lazy(() => import("@/pages/Notification"));
+const Profile = lazy(() => import("@/pages/Profile/Profile"));
+const Support = lazy(() => import("@/pages/Support"));
+const UploadJournal = lazy(() => import("@/pages/Journal/UploadJournal"));
 
 const ProtectedRoutes = () => (
   <>

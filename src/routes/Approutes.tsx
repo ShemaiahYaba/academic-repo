@@ -1,6 +1,6 @@
 // routes/AppRoutes.tsx
 import { Suspense, useEffect, useState } from "react";
-import { Route, Routes, Navigate } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { supabase } from "@/supabaseClient";
 import Preloader from "@/components/Preloader";
@@ -46,10 +46,9 @@ const AppRoutes = () => {
       <Suspense fallback={<Preloader />}>
         <Routes>
           <>
-            {isAuthenticated ? <ProtectedRoutes /> : <PublicRoutes />}
             <Route
               path="*"
-              element={<Navigate to={isAuthenticated ? "/" : "/"} />}
+              element={isAuthenticated ? <ProtectedRoutes /> : <PublicRoutes />}
             />
           </>
         </Routes>

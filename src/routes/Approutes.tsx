@@ -12,13 +12,25 @@ const AppRoutes = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }: { data: { session: import('@supabase/supabase-js').Session | null } }) => {
-      const session: import('@supabase/supabase-js').Session | null = data.session;
-      setIsAuthenticated(!!session);
-    });
+    supabase.auth
+      .getSession()
+      .then(
+        ({
+          data,
+        }: {
+          data: { session: import("@supabase/supabase-js").Session | null };
+        }) => {
+          const session: import("@supabase/supabase-js").Session | null =
+            data.session;
+          setIsAuthenticated(!!session);
+        }
+      );
 
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event: import('@supabase/supabase-js').AuthChangeEvent, session: import('@supabase/supabase-js').Session | null) => {
+      (
+        _event: import("@supabase/supabase-js").AuthChangeEvent,
+        session: import("@supabase/supabase-js").Session | null
+      ) => {
         setIsAuthenticated(!!session);
         console.log("Auth change:", _event, session);
       }
@@ -33,11 +45,13 @@ const AppRoutes = () => {
     <AuthProvider>
       <Suspense fallback={<Preloader />}>
         <Routes>
-          {isAuthenticated ? <ProtectedRoutes /> : <PublicRoutes />}
-          <Route
-            path="*"
-            element={<Navigate to={isAuthenticated ? "/" : "/"} />}
-          />
+          <>
+            {isAuthenticated ? <ProtectedRoutes /> : <PublicRoutes />}
+            <Route
+              path="*"
+              element={<Navigate to={isAuthenticated ? "/" : "/"} />}
+            />
+          </>
         </Routes>
       </Suspense>
     </AuthProvider>

@@ -1,5 +1,5 @@
 // routes/ProtectedRoutes.tsx
-import { Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { lazy } from "react";
 
@@ -17,94 +17,96 @@ const UploadJournal = lazy(() => import("@/pages/Journal/UploadJournal"));
 
 const ProtectedRoutes = () => (
   <>
-    <Route
-      path="/"
-      element={
-        <Layout>
-          <Home />
-        </Layout>
-      }
-    />
-    <Route
-      path="/journals"
-      element={
-        <Layout>
-          <Journals />
-        </Layout>
-      }
-    />
-    <Route
-      path="/articles"
-      element={
-        <Layout>
-          <Articles />
-        </Layout>
-      }
-    />
-    <Route
-      path="/post"
-      element={
-        <Layout>
-          <Post />
-        </Layout>
-      }
-    />
-    <Route
-      path="/editorialteam"
-      element={
-        <Layout>
-          <EditorialTeam />
-        </Layout>
-      }
-    />
-    <Route
-      path="/about"
-      element={
-        <Layout>
-          <About />
-        </Layout>
-      }
-    />
-    <Route
-      path="/journal/:id"
-      element={
-        <Layout>
-          <JournalDetail />
-        </Layout>
-      }
-    />
-    <Route
-      path="/notifications"
-      element={
-        <Layout>
-          <Notification />
-        </Layout>
-      }
-    />
-    <Route
-      path="/profile"
-      element={
-        <Layout>
-          <Profile />
-        </Layout>
-      }
-    />
-    <Route
-      path="/support"
-      element={
-        <Layout>
-          <Support />
-        </Layout>
-      }
-    />
-    <Route
-      path="/upload-journal"
-      element={
-        <Layout>
-          <UploadJournal />
-        </Layout>
-      }
-    />
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <Layout>
+            <Home />
+          </Layout>
+        }
+      />
+      <Route
+        path="/journals"
+        element={
+          <Layout>
+            <Journals />
+          </Layout>
+        }
+      />
+      <Route
+        path="/articles"
+        element={
+          <Layout>
+            <Articles />
+          </Layout>
+        }
+      />
+      <Route
+        path="/post"
+        element={
+          <Layout>
+            <Post />
+          </Layout>
+        }
+      />
+      <Route
+        path="/editorialteam"
+        element={
+          <Layout>
+            <EditorialTeam />
+          </Layout>
+        }
+      />
+      <Route
+        path="/about"
+        element={
+          <Layout>
+            <About />
+          </Layout>
+        }
+      />
+      <Route
+        path="/journal/:id"
+        element={
+          <Layout>
+            <JournalDetail />
+          </Layout>
+        }
+      />
+      <Route
+        path="/notifications"
+        element={
+          <Layout>
+            <Notification />
+          </Layout>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <Layout>
+            <Profile />
+          </Layout>
+        }
+      />
+      <Route
+        path="/support"
+        element={
+          <Layout>
+            <Support />
+          </Layout>
+        }
+      />
+      <Route
+        path="/upload-journal"
+        element={
+          <Layout>
+            <UploadJournal />
+          </Layout>
+        }
+      />
+    </Routes>
   </>
 );
 

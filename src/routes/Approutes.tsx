@@ -34,13 +34,12 @@ const AppRoutes = () => {
     <AuthProvider>
       <Suspense fallback={<Preloader />}>
         <Routes>
-          <>
-            {isAuthenticated ? <ProtectedRoutes /> : <PublicRoutes />}
-            <Route
-              path="*"
-              element={<Navigate to={isAuthenticated ? "/" : "/"} />}
-            />
-          </>
+          {isAuthenticated ? (
+            <Route path="/*" element={<ProtectedRoutes />} />
+          ) : (
+            <Route path="/*" element={<PublicRoutes />} />
+          )}
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Suspense>
     </AuthProvider>

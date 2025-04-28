@@ -7,15 +7,18 @@ const Posts: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex flex-1">
-        <LeftPanel />
-        <div>
+        <div className="w-1/4 min-w-[200px] max-w-xs">
+          <LeftPanel />
+        </div>
+        <div className="flex-1 flex flex-col px-4">
           <PostHeader />
-          <div className="flex flex-1 flex-col">
+          <div className="flex-1 flex flex-col">
             <PostBox />
           </div>
         </div>
-
-        <RightPanel />
+        <div className="w-1/4 min-w-[200px] max-w-xs">
+          <RightPanel />
+        </div>
       </div>
     </div>
   );

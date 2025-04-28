@@ -38,7 +38,7 @@ const RecentArticles: React.FC<{ user?: User }> = ({ user = mockUser }) => {
       <div className="flex flex-col items-center">
         {/* Recent Journal Uploads */}
         <div className="w-full mt-4">
-          <div className="font-semibold text-sm mb-2">Recent Journals</div>
+          <div className="font-semibold text-sm mb-2">Recent Articles</div>
           <ul className="space-y-2">
             {user.journals.slice(0, 3).map((journal) => (
               <li

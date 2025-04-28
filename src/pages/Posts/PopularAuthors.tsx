@@ -6,7 +6,7 @@ const PopularAuthors: React.FC = () => {
     <div className="w-[250px] p-6 bg-[#f5f6fa] rounded-xl shadow-md">
       <div className="flex items-center mb-4">
         <ChevronRightIcon className="w-5 h-5 text-gray-500 mr-2" />
-        <h2 className="text-2xl font-semibold">Popular Authors</h2>
+        <h2 className="font-semibold">Popular Authors</h2>
       </div>
       <ul>
         <li className="flex items-center justify-between mb-4">

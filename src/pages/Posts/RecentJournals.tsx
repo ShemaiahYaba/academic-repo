@@ -1,44 +1,60 @@
 import React from "react";
 
-const RecentJournals: React.FC = () => {
-  const [journals, setJournals] = React.useState<string[]>([]);
-  const [input, setInput] = React.useState("");
+type Journal = {
+  id: string;
+  title: string;
+  uploadedAt: string;
+};
 
-  const handleAddJournal = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (input.trim()) {
-      setJournals([input, ...journals]);
-      setInput("");
-    }
-  };
+type User = {
+  avatarUrl?: string;
+  firstName: string;
+  lastName: string;
+  researchField: string;
+  bio: string;
+  followersCount: number;
+  followingCount: number;
+  journals: Journal[];
+};
 
+const mockUser: User = {
+  avatarUrl: "",
+  firstName: "John",
+  lastName: "Doe",
+  researchField: "Computer Science",
+  bio: "Passionate about AI and data science.",
+  followersCount: 1234,
+  followingCount: 567,
+  journals: [
+    { id: "1", title: "Deep Learning Advances", uploadedAt: "2024-06-01" },
+    { id: "2", title: "AI in Healthcare", uploadedAt: "2024-05-28" },
+    { id: "3", title: "Data Science Trends", uploadedAt: "2024-05-20" },
+  ],
+};
+
+const RecentJournals: React.FC<{ user?: User }> = ({ user = mockUser }) => {
   return (
-    <div className="max-w-md mx-auto">
-      <h2 className="text-center mb-4 text-2xl font-semibold">
-        Recent Journals
-      </h2>
-      <form onSubmit={handleAddJournal} className="flex gap-2 mb-4">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Add a new journal entry..."
-          className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-        >
-          Add
-        </button>
-      </form>
-      <ul className="list-none p-0">
-        {journals.map((journal, idx) => (
-          <li key={idx} className="bg-gray-100 mb-2 p-3 rounded">
-            {journal}
-          </li>
-        ))}
-      </ul>
+    <div className="w-[250px] p-6 bg-[#f5f6fa] rounded-xl shadow-md">
+      <div className="flex flex-col items-center">
+        {/* Recent Journal Uploads */}
+        <div className="w-full mt-4">
+          <div className="font-semibold text-sm mb-2">Recent Journals</div>
+          <ul className="space-y-2">
+            {user.journals.slice(0, 3).map((journal) => (
+              <li
+                key={journal.id}
+                className="bg-white rounded p-2 shadow text-xs"
+              >
+                <div className="font-medium">{journal.title}</div>
+                <div className="text-gray-400">{journal.uploadedAt}</div>
+              </li>
+            ))}
+            {user.journals.length === 0 && (
+              <li className="text-gray-400 text-xs">No recent uploads.</li>
+            )}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 };

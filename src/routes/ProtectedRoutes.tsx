@@ -5,7 +5,7 @@ import { lazy } from "react";
 
 const Home = lazy(() => import("@/pages/Home"));
 const Journals = lazy(() => import("@/pages/Journals"));
-const Articles = lazy(() => import("@/pages/Articles"));
+const Articles = lazy(() => import("@/pages/Articles/Articles"));
 const Post = lazy(() => import("@/pages/Posts/Posts"));
 const EditorialTeam = lazy(() => import("@/pages/EditorialTeam"));
 const About = lazy(() => import("@/pages/About"));

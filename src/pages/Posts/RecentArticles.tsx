@@ -34,7 +34,7 @@ const mockUser: User = {
 
 const RecentArticles: React.FC<{ user?: User }> = ({ user = mockUser }) => {
   return (
-    <div className="w-[250px] p-6 bg-[#f5f6fa] rounded-xl shadow-md">
+    <div className="w-[300px] p-6 bg-[#f5f6fa] rounded-xl shadow-md">
       <div className="flex flex-col items-center">
         {/* Recent Journal Uploads */}
         <div className="w-full mt-4">

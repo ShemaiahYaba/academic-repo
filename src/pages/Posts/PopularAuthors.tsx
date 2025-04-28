@@ -3,9 +3,9 @@ import { ChevronRightIcon } from "@heroicons/react/16/solid";
 
 const PopularAuthors: React.FC = () => {
   return (
-    <div className="w-[250px] p-6 bg-[#f5f6fa] rounded-xl shadow-md">
+    <div className="w-[300px] p-6 bg-[#f5f6fa] rounded-xl shadow-md text-gray-800">
       <div className="flex items-center mb-4">
-        <ChevronRightIcon className="w-5 h-5 text-gray-500 mr-2" />
+        <ChevronRightIcon className="w-5 h-5 text-black mr-2" />
         <h2 className="font-semibold">Popular Authors</h2>
       </div>
       <ul>

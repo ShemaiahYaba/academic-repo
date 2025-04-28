@@ -1,7 +1,7 @@
 import Card from "@/components/Card";
-import Hero from "../components/Hero";
-import Paragraph from "../components/Paragraph";
-import { info } from "../constants/dataItems";
+import Hero from "@/components/Hero";
+import Paragraph from "@/components/Paragraph";
+import { info } from "@/constants/dataItems";
 
 const Home = () => {
   return (

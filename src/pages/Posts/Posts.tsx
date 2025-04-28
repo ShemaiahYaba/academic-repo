@@ -5,18 +5,23 @@ import PostHeader from "@/pages/Posts/PostHeader";
 
 const Posts: React.FC = () => {
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="flex flex-1">
-        <div className="w-1/4 min-w-[200px] max-w-xs">
+    <div className="flex flex-col min-h-screen box-border p-4">
+      <div className="flex flex-1 flex-col md:flex-row gap-4">
+        {/* Left Panel */}
+        <div className="hidden md:block w-full md:w-1/4 min-w-[200px] max-w-xs box-border">
           <LeftPanel />
         </div>
-        <div className="flex-1 flex flex-col px-4">
-          <PostHeader />
-          <div className="flex-1 flex flex-col">
+
+        {/* Center Content */}
+        <div className="flex-1 flex justify-center box-border">
+          <div className="w-full max-w-xl bg-[#f5f6fa] rounded-lg shadow p-4 space-y-4">
+            <PostHeader />
             <PostBox />
           </div>
         </div>
-        <div className="w-1/4 min-w-[200px] max-w-xs">
+
+        {/* Right Panel */}
+        <div className="hidden md:block w-full md:w-1/4 min-w-[200px] max-w-xs box-border">
           <RightPanel />
         </div>
       </div>

@@ -1,12 +1,13 @@
 // contexts/AuthContext.tsx
 import { createContext, useContext } from "react";
-import type { User, AuthResponse } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 
 interface AuthContextType {
   user: User | null;
-  signUp: (email: string, password: string) => Promise<AuthResponse>;
-  signIn: (email: string, password: string) => Promise<AuthResponse>;
-  signOut: () => Promise<{ error: Error | null }>;
+  isAuthenticated: boolean;
+  signUp: (email: string, password: string) => Promise<User>;
+  signIn: (email: string, password: string) => Promise<User>;
+  signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
 }
 

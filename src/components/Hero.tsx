@@ -1,4 +1,4 @@
-import { banner } from "../constants/images";
+import { banner } from "@/constants/images";
 
 const Hero = () => {
   return (
@@ -13,11 +13,15 @@ const Hero = () => {
           Digital Repository
         </h1>
         <p className="text-white font-bold">
-        Welcome, this repository provides access to a diverse range of research  <br/>
-        materials, including journal articles, conference proceedings, practice-based <br/>
-        research, videos, audio recordings, artworks,exhibitions, books, book chapters, <br/>
-        theses, and datasets. Full-text access is available where permitted, alongside <br/>
-        detailed citations for restricted materials
+          Welcome, this repository provides access to a diverse range of
+          research <br />
+          materials, including journal articles, conference proceedings,
+          practice-based <br />
+          research, videos, audio recordings, artworks,exhibitions, books, book
+          chapters, <br />
+          theses, and datasets. Full-text access is available where permitted,
+          alongside <br />
+          detailed citations for restricted materials
         </p>
       </div>
     </div>

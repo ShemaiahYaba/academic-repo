@@ -27,7 +27,7 @@ export const primaryMenu = [
   { label: "Articles", href: "/articles", icon: articles },
   { label: "Posts", href: "/post", icon: post },
   { label: "About", href: "/about", icon: about },
-  { label: "Editorial Team", href: "/editorialteam", icon: about}
+  { label: "Editorial Team", href: "/editorialteam", icon: about },
 ];
 
 export const secondaryMenu = [

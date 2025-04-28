@@ -13,7 +13,7 @@ const PopularAuthors: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto">
+    <div className="w-[250px] p-6 bg-[#f5f6fa] rounded-xl shadow-md">
       <h2 className="text-center mb-4 text-2xl font-semibold">
         Popular Authors
       </h2>

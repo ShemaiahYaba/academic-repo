@@ -1,43 +1,35 @@
 import React from "react";
+import { ChevronRightIcon } from "@heroicons/react/16/solid";
 
 const PopularAuthors: React.FC = () => {
-  const [authors, setAuthors] = React.useState<string[]>([]);
-  const [input, setInput] = React.useState("");
-
-  const handleAddAuthor = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (input.trim()) {
-      setAuthors([input, ...authors]);
-      setInput("");
-    }
-  };
-
   return (
     <div className="w-[250px] p-6 bg-[#f5f6fa] rounded-xl shadow-md">
-      <h2 className="text-center mb-4 text-2xl font-semibold">
-        Popular Authors
-      </h2>
-      <form onSubmit={handleAddAuthor} className="flex gap-2 mb-4">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Add a new author..."
-          className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-        >
-          Add
-        </button>
-      </form>
-      <ul className="list-none p-0">
-        {authors.map((author, idx) => (
-          <li key={idx} className="bg-gray-100 mb-2 p-3 rounded">
-            {author}
-          </li>
-        ))}
+      <div className="flex items-center mb-4">
+        <ChevronRightIcon className="w-5 h-5 text-gray-500 mr-2" />
+        <h2 className="text-2xl font-semibold">Popular Authors</h2>
+      </div>
+      <ul>
+        <li className="flex items-center justify-between mb-4">
+          <div>
+            <div className="font-medium">Dr. Jane Smith</div>
+            <div className="text-sm text-gray-500">Machine Learning</div>
+          </div>
+          <span className="text-gray-700 font-semibold">42</span>
+        </li>
+        <li className="flex items-center justify-between mb-4">
+          <div>
+            <div className="font-medium">Prof. John Doe</div>
+            <div className="text-sm text-gray-500">Quantum Computing</div>
+          </div>
+          <span className="text-gray-700 font-semibold">35</span>
+        </li>
+        <li className="flex items-center justify-between">
+          <div>
+            <div className="font-medium">Dr. Emily Zhang</div>
+            <div className="text-sm text-gray-500">Bioinformatics</div>
+          </div>
+          <span className="text-gray-700 font-semibold">28</span>
+        </li>
       </ul>
     </div>
   );

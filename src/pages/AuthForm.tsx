@@ -20,13 +20,13 @@ const AuthForm = () => {
 
     try {
       if (isSignUp) {
-        const { error } = await signUp(form.email, form.password);
-        if (error) throw error;
+        await signUp(form.email, form.password);
+        // If signUp throws on error, no need to check error property
         alert("Account created! Check your inbox to verify.");
         setIsSignUp(false);
       } else {
-        const { error } = await signIn(form.email, form.password);
-        if (error) throw error;
+        await signIn(form.email, form.password);
+        // If signIn throws on error, no need to check error property
         navigate("/");
       }
     } catch (err: unknown) {

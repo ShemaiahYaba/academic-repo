@@ -5,20 +5,16 @@ const UserCard: React.FC = () => {
     <>
       <div className="w-[250px] p-6 bg-[#f5f6fa] rounded-xl shadow-md">
         <div className="flex flex-col items-center">
-          {/* Profile Circle */}
-          <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center text-4xl text-gray-500 mb-4">
-            {/* Replace with <img src={user.avatarUrl} ... /> if available */}
-            <span>AB</span>
-          </div>
-          {/* Name */}
-          <div className="font-semibold text-xl mb-1">
-            {/* Replace with {user.firstName} {user.lastName} */}
-            John Doe
-          </div>
-          {/* Research Field */}
-          <div className="text-gray-500 text-sm mb-2">
-            {/* Replace with {user.researchField} */}
-            Computer Science
+          <div className="flex items-center mb-4">
+            {/* Profile Circle */}
+            <div className="w-20 h-20 rounded-full bg-gray-300 flex items-center justify-center text-4xl text-gray-500 mr-4">
+              <span>AB</span>
+            </div>
+            <div>
+              <div className="font-semibold text-xl mb-1">John Doe</div>
+              {/* Research Field */}
+              <div className="text-gray-500 text-sm mb-2">Computer Science</div>
+            </div>
           </div>
           {/* Bio */}
           <div className="text-gray-500 text-sm text-center mb-4">

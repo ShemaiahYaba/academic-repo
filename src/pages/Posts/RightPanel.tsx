@@ -1,5 +1,5 @@
 import RecentArticles from "@/pages/Posts/RecentArticles";
-import Feed from "@/pages/Posts/Feed";
+import RecentJournals from "@/pages/Posts/RecentJournals";
 
 const RightPanel: React.FC = () => {
   return (
@@ -7,8 +7,9 @@ const RightPanel: React.FC = () => {
       <div className="flex flex-col items-center">
         {/* Recent Journal Uploads */}
         <RecentArticles />
+        <div className="my-6 w-full border-t border-gray-200" />
         {/* Feed */}
-        <Feed />
+        <RecentJournals />
       </div>
     </div>
   );

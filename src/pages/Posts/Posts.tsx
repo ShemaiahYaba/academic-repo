@@ -6,12 +6,15 @@ import PostHeader from "@/pages/Posts/PostHeader";
 const Posts: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
-      <PostHeader />
       <div className="flex flex-1">
         <LeftPanel />
-        <div className="flex flex-1 flex-col">
-          <PostBox />
+        <div>
+          <PostHeader />
+          <div className="flex flex-1 flex-col">
+            <PostBox />
+          </div>
         </div>
+
         <RightPanel />
       </div>
     </div>

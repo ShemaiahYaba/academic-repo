@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { db } from "@/firebase";
 import { useAuth } from "@/contexts/AuthContext"; // Ensure Firebase is configured properly
-import { doc, getDoc, collection, addDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore"; // Import getDoc
 import { ProfileHeader } from "@/pages/Profile/ProfileHeader";
 import { JournalForm } from "@/pages/Journal/JournalForm";
 import { marginLineHorizontal } from "@/constants/images";
@@ -22,7 +22,7 @@ const UploadJournal: React.FC = () => {
     subject: "",
     documentLink: "",
   });
-  const { user } = useAuth();
+  const { user } = useAuth(); // user could potentially be null
   const [loading, setLoading] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +35,7 @@ const UploadJournal: React.FC = () => {
           return;
         }
 
-        const userDocRef = doc(db, "users", user.id); // Use Supabase user ID
+        const userDocRef = doc(db, "users", user.email!); // Use Supabase user ID
         const userSnap = await getDoc(userDocRef);
 
         if (userSnap.exists()) {
@@ -54,7 +54,10 @@ const UploadJournal: React.FC = () => {
       }
     };
 
-    fetchUserData();
+    // Only fetch user data if `user` is not null
+    if (user) {
+      fetchUserData();
+    }
   }, [user]);
 
   const handleChange = (
@@ -106,7 +109,15 @@ const UploadJournal: React.FC = () => {
         return;
       }
 
-      await addDoc(collection(db, "journals"), {
+      // Using user's email as the document ID
+      if (!user || !user.email) {
+        setError("User is not authenticated or email is missing.");
+        setLoading(false);
+        return;
+      }
+      const journalDocRef = doc(db, "journals", user.email); // Use email as the document ID
+
+      await setDoc(journalDocRef, {
         title,
         authors,
         overview,

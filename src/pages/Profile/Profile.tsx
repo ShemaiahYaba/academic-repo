@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { supabase } from "@/supabaseClient"; // Import Supabase client
-import { useAuth } from "@/contexts/AuthContext"; // Assuming you have an AuthContext to get the user
-import { ProfileImageUpload } from "@/components/ProfileImageUpload"; // Importing modularized image upload component
-import { ProfileForm } from "@/pages/Profile/ProfileForm"; // Importing the form component
+import { useAuth } from "@/contexts/AuthContext";
+import { ProfileImageUpload } from "@/components/ProfileImageUpload";
+import { ProfileForm } from "@/pages/Profile/ProfileForm";
 import { marginLineHorizontal } from "@/constants/images";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { db } from "@/firebase";
+
+const DEFAULT_PROFILE_IMAGE = "https://via.placeholder.com/150";
 
 const Profile: React.FC = () => {
-  const { user } = useAuth(); // Get current user
+  const { user } = useAuth();
   const [profileImage, setProfileImage] = useState<string | undefined>(
-    "https://via.placeholder.com/150"
+    DEFAULT_PROFILE_IMAGE
   );
   const [formData, setFormData] = useState({
     firstName: "",
@@ -16,104 +19,88 @@ const Profile: React.FC = () => {
     middlename: "",
     mobileNumber: "",
     bio: "",
-    taxIdNumber: "",
-    taxIdCountry: "Nigeria",
-    residentialAddress: "",
     school: "",
     degree: "",
     fieldOfStudy: "",
     researchField: "",
+    username: "",
   });
 
-  // Fetch user profile from Supabase
+  // Load existing user profile on mount
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (user) {
-        const { data, error } = await supabase
-          .from("profiles") // Replace with your actual table name
-          .select("*")
-          .eq("user_id", user.id)
-          .single(); // Fetch single record based on user ID
+    if (!user) return;
 
-        if (data) {
-          setFormData({
-            ...data,
-            taxIdCountry: data.taxIdCountry || "Nigeria", // Handle default value if needed
-          });
-          setProfileImage(data.profileImage || profileImage); // Set profile image if available
-        }
+    const loadUserProfile = async () => {
+      const userRef = doc(db, "users", user.email!);
+      const docSnap = await getDoc(userRef);
 
-        if (error) {
-          console.error("Error fetching user profile:", error.message);
-        }
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setFormData((prev) => ({
+          ...prev,
+          ...data,
+          taxIdCountry: data.taxIdCountry || "Nigeria",
+        }));
+        setProfileImage(data.profileImage || DEFAULT_PROFILE_IMAGE);
       }
     };
 
-    fetchUserProfile();
-  }, [user, profileImage]);
+    loadUserProfile();
+  }, [user]);
 
-  // Handle form input changes
-  const handleChange = (
+  // Handle field input change (no autosave)
+  const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    const updatedForm = {
+      ...formData,
+      [name]: value,
+    };
+
+    // If first or last name changed, regenerate username
+    if (name === "firstName" || name === "lastName") {
+      const firstName = name === "firstName" ? value : formData.firstName;
+      const lastName = name === "lastName" ? value : formData.lastName;
+      updatedForm.username = `@${firstName.toLowerCase()}${lastName.toLowerCase()}`;
+    }
+
+    setFormData(updatedForm);
   };
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Manually save form to Firestore
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
     try {
-      const username = `@${formData.firstName.toLowerCase()}${formData.lastName.toLowerCase()}`;
-
-      // Upsert user profile data in Supabase
-      const { error } = await supabase.from("profiles").upsert(
-        [
-          {
-            user_id: user.id, // Match by user_id
-            username: username,
-            ...formData, // Include all other form data
-            profileImage: profileImage, // Include the profile image
-          },
-        ],
-        { onConflict: "user_id" } // Ensure updating an existing profile if it exists
-      );
-
-      if (error) {
-        throw error;
-      }
-
-      alert("Profile updated successfully");
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      alert("Failed to update profile");
+      const userRef = doc(db, "users", user.email!);
+      await setDoc(userRef, {
+        ...formData,
+        profileImage,
+      });
+      alert("Profile saved successfully!");
+    } catch (err) {
+      console.error("Error saving profile:", err);
+      alert("Failed to save profile.");
     }
   };
 
   return (
     <div className="p-4">
-      <div className="justify-center items-center flex flex-col">
-        {/* Profile Image Section */}
+      <div className="flex flex-col items-center">
         <ProfileImageUpload
           profileImage={profileImage}
           setProfileImage={setProfileImage}
         />
-
-        <img
-          className="py-4 mx-auto"
-          src={marginLineHorizontal}
-          alt="Divider"
-        />
-
-        {/* Profile Form */}
+        <img className="py-4" src={marginLineHorizontal} alt="Divider" />
         <ProfileForm
           formData={formData}
-          handleChange={handleChange}
-          handleSubmit={handleSubmit}
+          handleChange={handleInputChange}
+          handleSubmit={handleSaveProfile}
         />
       </div>
     </div>

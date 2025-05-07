@@ -8,9 +8,7 @@ interface ProfileFormProps {
     middlename: string;
     mobileNumber: string;
     bio: string;
-    taxIdNumber: string;
-    taxIdCountry: string;
-    residentialAddress: string;
+
     school: string;
     degree: string;
     fieldOfStudy: string;
@@ -87,6 +85,23 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
           name="degree"
           value={formData.degree}
           onChange={handleChange}
+          type="select"
+          options={[
+            { value: "", label: "Select Degree" },
+            { value: "Associate", label: "Associate" },
+            { value: "Bachelor", label: "Bachelor" },
+            { value: "BSc", label: "BSc" },
+            { value: "BA", label: "BA" },
+            { value: "Master", label: "Master" },
+            { value: "MSc", label: "MSc" },
+            { value: "MA", label: "MA" },
+            { value: "MBA", label: "MBA" },
+            { value: "PhD", label: "PhD" },
+            { value: "MD", label: "MD" },
+            { value: "JD", label: "JD" },
+            { value: "Diploma", label: "Diploma" },
+            { value: "Certificate", label: "Certificate" },
+          ]}
         />
         <InputField
           label="Field of Study"

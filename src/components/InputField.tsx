@@ -7,42 +7,58 @@ interface InputFieldProps {
   type?: string;
   value: string;
   onChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => void;
   isTextArea?: boolean;
+  options?: { value: string; label: string }[];
 }
 
 const InputField: React.FC<InputFieldProps> = ({
   label,
   id,
   name,
-  type = "text",
   value,
   onChange,
   isTextArea,
+  options,
 }) => {
   return (
-    <div className="flex flex-col">
-      <label htmlFor={id} className="text-sm font-medium text-gray-700">
+    <div className="mb-4">
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700">
         {label}
       </label>
-      {isTextArea ? (
+      {options ? (
+        <select
+          id={id}
+          name={name}
+          value={value}
+          onChange={onChange}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-4"
+        >
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      ) : isTextArea ? (
         <textarea
           id={id}
           name={name}
           value={value}
           onChange={onChange}
-          className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          rows={4}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-6"
         />
       ) : (
         <input
+          type="text"
           id={id}
           name={name}
-          type={type}
           value={value}
           onChange={onChange}
-          className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-4"
         />
       )}
     </div>

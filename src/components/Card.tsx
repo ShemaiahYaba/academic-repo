@@ -3,10 +3,8 @@ import { publicationCard, publicationOptions } from "../constants/dataItems";
 import { save, like, likeActive } from "@/constants/images";
 
 const Card: React.FC = () => {
-  // State to track which cards have active likes
   const [likedCards, setLikedCards] = useState<Record<number, boolean>>({});
 
-  // Toggle like status for a specific card
   const handleLikeClick = (cardId: number) => {
     setLikedCards((prev) => ({
       ...prev,
@@ -19,47 +17,56 @@ const Card: React.FC = () => {
       {publicationCard.map((items) => (
         <div
           key={items.id}
-          className="w-full max-w-md border border-gray-200 rounded-lg shadow-lg bg-white"
+          className="group w-full max-w-md border border-gray-200 rounded-lg shadow-lg bg-white transition-transform duration-300 ease-in-out hover:scale-105"
         >
           <a href="#">
             <img
-              className="rounded-t-lg w-full h-64 object-cover"
+              className="rounded-t-lg w-full h-64 object-cover transition-all duration-300 ease-in-out group-hover:brightness-95"
               src={items.icon}
               alt={items.label}
             />
           </a>
-          <div className="p-6 ">
-            {/* Icons Row */}
+          <div className="p-6">
             <div className="flex space-x-4 mb-4 justify-end">
-              {/* Word icon */}
               <img
                 src={publicationOptions[0].icon}
-                className="w-5 h-5 object-contain"
+                className="w-5 h-5 object-contain transition-all duration-300 ease-in-out"
               />
-              {/* Share icon */}
               <img
                 src={publicationOptions[1].icon}
-                className="w-5 h-5 object-contain"
+                className="w-5 h-5 object-contain transition-all duration-300 ease-in-out"
               />
-              {/* Like icon - clickable */}
               <img
                 src={likedCards[items.id] ? likeActive : like}
-                className="w-5 h-5 object-contain cursor-pointer"
+                className="w-5 h-5 object-contain cursor-pointer transition-all duration-300 ease-in-out"
                 onClick={() => handleLikeClick(items.id)}
                 alt="Like"
               />
             </div>
-            {/* Card Content */}
             <a href="#">
-              <h5 className="mb-4 text-2xl font-bold tracking-tight text-gray-900">
-                {items.label}
+              <h5
+                className="mb-4 text-2xl font-bold tracking-tight text-gray-900 relative"
+                title={items.label.length > 50 ? items.label : undefined}
+              >
+                <span
+                  className="
+                    block overflow-hidden text-ellipsis whitespace-nowrap
+                    group-hover:whitespace-normal group-hover:overflow-visible group-hover:text-wrap
+                    transition-all duration-300 ease-in-out
+                  "
+                >
+                  {items.label}
+                </span>
               </h5>
             </a>
-            <div className="flex justify-between justify-items-center">
-              <img src={save} className="w-5 h-5 object-contain" />
+            <div className="flex items-center justify-between">
+              <img
+                src={save}
+                className="w-5 h-5 object-contain transition-all duration-300 ease-in-out"
+              />
               <a
                 href="#"
-                className="inline-flex items-center px-4 py-2 text-sm font-light t"
+                className="inline-flex items-center px-4 py-2 text-sm font-light transition-colors duration-300 ease-in-out hover:text-blue-600"
               >
                 Read more
               </a>

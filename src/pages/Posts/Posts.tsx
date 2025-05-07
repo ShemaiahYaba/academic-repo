@@ -1,7 +1,8 @@
 import LeftPanel from "@/pages/Posts/LeftPanel";
 import RightPanel from "@/pages/Posts/RightPanel";
-import PostBox from "@/pages/Posts/PostBox";
+
 import PostHeader from "@/pages/Posts/PostHeader";
+import { RandomPostBox } from "./RandomPostBox";
 
 const Posts: React.FC = () => {
   return (
@@ -16,7 +17,8 @@ const Posts: React.FC = () => {
         <div className="flex-1 flex justify-center box-border">
           <div className="w-full max-w-xl bg-[#f5f6fa] rounded-lg shadow p-4 space-y-4">
             <PostHeader />
-            <PostBox />
+
+            <RandomPostBox />
           </div>
         </div>
 

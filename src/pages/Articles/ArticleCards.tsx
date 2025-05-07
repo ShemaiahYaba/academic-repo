@@ -59,7 +59,16 @@ const ArticleCard: React.FC<ArticleCardProps> = ({
   </div>
 );
 
-const cards = [
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
+
+const cardsData = [
   {
     profileUrl: "https://randomuser.me/api/portraits/men/32.jpg",
     name: "Dr. Alex Johnson",
@@ -84,14 +93,62 @@ const cards = [
     highlight:
       "Bioinformatics integrates biology, computer science, and statistics to analyze and interpret biological data.",
   },
+  {
+    profileUrl: "https://randomuser.me/api/portraits/men/68.jpg",
+    name: "Dr. Samuel Lee",
+    field: "Bioinformatics",
+    keywords: ["Genomics", "Data Analysis", "Proteomics"],
+    highlight:
+      "Bioinformatics integrates biology, computer science, and statistics to analyze and interpret biological data.",
+  },
+  {
+    profileUrl: "https://randomuser.me/api/portraits/women/52.jpg",
+    name: "Dr. Maria Gomez",
+    field: "Astrophysics",
+    keywords: ["Black Holes", "Cosmology", "Dark Matter"],
+    highlight:
+      "Astrophysics explores the mysteries of the universe, from the behavior of black holes to the origins of dark matter.",
+  },
+  {
+    profileUrl: "https://randomuser.me/api/portraits/men/21.jpg",
+    name: "Prof. David Kim",
+    field: "Robotics",
+    keywords: ["Automation", "Sensors", "AI Integration"],
+    highlight:
+      "Modern robotics combines advanced sensors and artificial intelligence to create autonomous systems for diverse applications.",
+  },
+  {
+    profileUrl: "https://randomuser.me/api/portraits/women/36.jpg",
+    name: "Dr. Priya Nair",
+    field: "Environmental Science",
+    keywords: ["Climate Change", "Sustainability", "Ecology"],
+    highlight:
+      "Environmental science seeks sustainable solutions to pressing ecological challenges, including climate change and biodiversity loss.",
+  },
+  {
+    profileUrl: "https://randomuser.me/api/portraits/men/47.jpg",
+    name: "Prof. Michael Brown",
+    field: "Cognitive Neuroscience",
+    keywords: ["Brain", "Memory", "Perception"],
+    highlight:
+      "Cognitive neuroscience unravels the mysteries of the human mind by studying how brain processes give rise to perception and memory.",
+  },
 ];
 
-const ArticleCards: React.FC = () => (
-  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-    {cards.map((card, idx) => (
-      <ArticleCard key={idx} {...card} />
-    ))}
-  </div>
-);
+const ArticleCards: React.FC = () => {
+  const [cards, setCards] = React.useState<typeof cardsData>([]);
+
+  React.useEffect(() => {
+    setCards(shuffleArray(cardsData).slice(0, 3));
+  }, []);
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {cards.map((card, idx) => (
+        <ArticleCard key={idx} {...card} />
+      ))}
+    </div>
+  );
+};
 
 export default ArticleCards;

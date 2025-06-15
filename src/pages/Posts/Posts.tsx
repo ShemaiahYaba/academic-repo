@@ -8,9 +8,11 @@ const Posts: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen box-border p-4">
       <div className="flex flex-1 flex-col md:flex-row gap-4">
-        {/* Left Panel */}
+        {/* Left Panel - Sticky */}
         <div className="hidden md:block w-full md:w-1/4 min-w-[200px] max-w-xs box-border">
-          <LeftPanel />
+          <div className="sticky top-4">
+            <LeftPanel />
+          </div>
         </div>
 
         {/* Center Content */}
@@ -22,9 +24,11 @@ const Posts: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Panel */}
+        {/* Right Panel - Sticky */}
         <div className="hidden md:block w-full md:w-1/4 min-w-[200px] max-w-xs box-border">
-          <RightPanel />
+          <div className="sticky top-4">
+            <RightPanel />
+          </div>
         </div>
       </div>
     </div>

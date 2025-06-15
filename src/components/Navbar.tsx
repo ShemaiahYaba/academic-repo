@@ -19,11 +19,11 @@ const Navbar = () => {
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
         <a href="/" className="flex items-center space-x-3">
           <img
-            src="https://flowbite.com/docs/images/logo.svg"
+            src="https://cdn-icons-png.flaticon.com/512/2103/2103633.png"
             className="h-8"
             alt="Flowbite Logo"
           />
-          <span className="text-2xl font-semibold">REPO</span>
+          <span className="text-2xl font-semibold">JOTS</span>
         </a>
         {/* Mobile Menu Button */}
         <button

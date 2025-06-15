@@ -16,6 +16,11 @@ import {
   cardImage1,
   cardImage2,
   cardImage3,
+  cardImage4,
+  cardImage5,
+  cardImage6,
+  cardImage7,
+  cardImage8,
   like,
   word,
   share,
@@ -128,7 +133,7 @@ export const info = [
     label: "Access to the Lastest Books ",
     icon: searchBook,
     paragraph:
-      "Stay up to date with the latest books, offering fresh insights and valuable knowledge across various fields.",
+      "Stay up to date with the latest books, offering fresh insights and valuable knowledge across various fields.",
   },
 ];
 
@@ -136,20 +141,55 @@ export const publicationCard = [
   {
     id: 1,
     label: "The Biblical Worldview: A springboard for cultural reform",
-    icon: cardImage1,
+    icon: cardImage4,
   },
   {
     id: 2,
     label:
       "Comparison of Dual Therapies for Lowering Blood Pressure in Black Africans",
-    icon: cardImage2,
+    icon: cardImage5,
   },
   {
     id: 3,
     label:
       "Use of Maize Cob-Activated Charcoal for Wastewater Treatment in Aquaculture for Reuse",
+    icon: cardImage6,
+  },
+  {
+    id: 4,
+    label: "Artificial Intelligence in Healthcare: Ethical Implications and Future Directions",
+    icon: cardImage7,
+  },
+  {
+    id: 5,
+    label: "Sustainable Urban Development: Integrating Green Spaces in Modern Cities",
+    icon: cardImage8,
+  },
+  {
+    id: 6,
+    label: "The Impact of Climate Change on Agricultural Productivity in Sub-Saharan Africa",
+    icon: cardImage1,
+  },
+  {
+    id: 7,
+    label: "Digital Transformation in Education: Challenges and Opportunities",
+    icon: cardImage2,
+  },
+  {
+    id: 8,
+    label: "Renewable Energy Technologies: A Comparative Analysis of Solar and Wind Power",
     icon: cardImage3,
   },
+  {
+    id: 9,
+    label: "Mental Health in the Digital Age: Social Media's Impact on Adolescent Well-being",
+    icon: cardImage4,
+  },
+  {
+    id: 10,
+    label: "Blockchain Technology in Supply Chain Management: A Systematic Review",
+    icon: cardImage5,
+  }
 ];
 
 export const publicationOptions = [
@@ -160,50 +200,85 @@ export const publicationOptions = [
 
 export const journalData = [
   {
-    title:
-      "Effect of Biodiesel from Agriculture as an alternate source of Energy",
+    title: "Effect of Biodiesel from Agriculture as an alternate source of Energy",
     authors: "Micheal Brook, David James, Edward Parker",
     keywords: "Biodiesel, Energy, Agriculture",
     ratings: "87%",
     reviews: 215,
+    abstract: "This comprehensive study examines the viability of agricultural biodiesel as an alternative energy source. Through extensive research and experimentation, we analyze the production efficiency, environmental impact, and economic feasibility of biodiesel derived from various agricultural sources. Our findings indicate significant potential for reducing carbon emissions while maintaining energy output comparable to traditional fossil fuels. The study also addresses key challenges in production scalability and proposes innovative solutions for widespread implementation."
   },
-
   {
-    title:
-      "Effect of Biodiesel from Agriculture as an alternate source of Energy",
-    authors: "Micheal Brook, David James, Edward Parker",
-    keywords: "Biodiesel, Energy, Agriculture",
-    ratings: "87%",
-    reviews: 215,
+    title: "Quantum Computing Applications in Drug Discovery",
+    authors: "Sarah Chen, Robert Martinez, Aisha Patel",
+    keywords: "Quantum Computing, Pharmaceuticals, Computational Chemistry",
+    ratings: "92%",
+    reviews: 178,
+    abstract: "This groundbreaking research explores the application of quantum computing in accelerating drug discovery processes. By leveraging quantum algorithms, we demonstrate a 300% increase in molecular simulation speed compared to classical computing methods. The study presents a novel framework for protein-ligand interaction prediction and drug efficacy analysis, potentially revolutionizing the pharmaceutical industry's approach to drug development. Our results show promising applications in targeting complex diseases and reducing drug development timelines."
   },
-
   {
-    title:
-      "Effect of Biodiesel from Agriculture as an alternate source of Energy",
-    authors: "Micheal Brook, David James, Edward Parker",
-    keywords: "Biodiesel, Energy, Agriculture",
-    ratings: "87%",
-    reviews: 215,
+    title: "Machine Learning Approaches in Climate Change Prediction",
+    authors: "James Wilson, Maria Rodriguez, Thomas Kim",
+    keywords: "Machine Learning, Climate Science, Data Analysis",
+    ratings: "89%",
+    reviews: 245,
+    abstract: "This study introduces an innovative machine learning framework for climate change prediction, utilizing historical data and real-time environmental monitoring. Our model achieves 94% accuracy in predicting temperature variations and extreme weather events up to 12 months in advance. The research incorporates multiple data sources, including satellite imagery, ocean temperature readings, and atmospheric measurements, providing a comprehensive approach to climate modeling. The findings have significant implications for climate policy and disaster preparedness."
   },
-
   {
-    title:
-      "Effect of Biodiesel from Agriculture as an alternate source of Energy",
-    authors: "Micheal Brook, David James, Edward Parker",
-    keywords: "Biodiesel, Energy, Agriculture",
-    ratings: "87%",
-    reviews: 215,
+    title: "Neural Mechanisms of Memory Formation in Drosophila",
+    authors: "Emily Zhang, William Thompson, Lisa Anderson",
+    keywords: "Neuroscience, Genetics, Memory",
+    ratings: "85%",
+    reviews: 156,
+    abstract: "This research investigates the neural pathways involved in memory formation in Drosophila melanogaster, offering insights into fundamental memory processes. Using advanced imaging techniques and genetic manipulation, we identify specific neural circuits responsible for short-term and long-term memory formation. The study reveals novel mechanisms of synaptic plasticity and provides a foundation for understanding memory disorders in humans. Our findings contribute to the broader understanding of neural plasticity and memory consolidation across species."
   },
-
   {
-    title:
-      "Effect of Biodiesel from Agriculture as an alternate source of Energy",
-    authors: "Micheal Brook, David James, Edward Parker",
-    keywords: "Biodiesel, Energy, Agriculture",
-    ratings: "87%",
-    reviews: 215,
+    title: "Sustainable Urban Development: A Case Study of Smart Cities",
+    authors: "David Kumar, Sophia Lee, Carlos Mendez",
+    keywords: "Urban Planning, Sustainability, Smart Technology",
+    ratings: "91%",
+    reviews: 203,
+    abstract: "This comprehensive analysis examines the implementation of smart city technologies in urban development, focusing on sustainability and quality of life improvements. Through case studies of five major cities, we evaluate the effectiveness of IoT integration, renewable energy systems, and smart transportation networks. The research identifies key success factors and challenges in sustainable urban development, providing a framework for future smart city initiatives. Our findings demonstrate significant improvements in resource efficiency and citizen satisfaction."
   },
-  // Add more journal data as needed
+  {
+    title: "CRISPR-Cas9 Applications in Agricultural Biotechnology",
+    authors: "Rachel Green, Michael Brown, Yuki Tanaka",
+    keywords: "Genetics, Agriculture, Biotechnology",
+    ratings: "94%",
+    reviews: 267,
+    abstract: "This study explores the revolutionary applications of CRISPR-Cas9 technology in agricultural biotechnology. We present successful case studies of crop modification for enhanced yield, disease resistance, and nutritional content. The research addresses ethical considerations and regulatory frameworks while demonstrating the technology's potential to address global food security challenges. Our findings show a 40% increase in crop yield and 60% reduction in pesticide use in modified crops."
+  },
+  {
+    title: "Artificial Intelligence in Medical Imaging: Current Trends",
+    authors: "Alex Johnson, Priya Sharma, Marcus White",
+    keywords: "AI, Medical Imaging, Healthcare",
+    ratings: "88%",
+    reviews: 189,
+    abstract: "This comprehensive review examines the current state and future potential of artificial intelligence in medical imaging. We analyze the implementation of deep learning algorithms in various imaging modalities, including MRI, CT, and X-ray. The study demonstrates a 25% improvement in diagnostic accuracy and 40% reduction in analysis time. Our research highlights the challenges of AI integration in healthcare and proposes solutions for widespread adoption."
+  },
+  {
+    title: "Ocean Acidification and Coral Reef Ecosystems",
+    authors: "Emma Wilson, Juan Carlos, Mei Lin",
+    keywords: "Marine Biology, Climate Change, Ecology",
+    ratings: "86%",
+    reviews: 174,
+    abstract: "This critical study investigates the impact of ocean acidification on coral reef ecosystems across the Pacific Ocean. Through extensive field research and laboratory experiments, we document the physiological and ecological responses of coral species to changing pH levels. The findings reveal a 30% decline in coral calcification rates and significant changes in reef biodiversity. Our research provides crucial data for conservation efforts and climate change mitigation strategies."
+  },
+  {
+    title: "Nanotechnology in Renewable Energy Storage",
+    authors: "Daniel Park, Sarah O'Connor, Raj Patel",
+    keywords: "Nanotechnology, Energy Storage, Materials Science",
+    ratings: "90%",
+    reviews: 198,
+    abstract: "This innovative research explores the application of nanotechnology in improving renewable energy storage systems. We present a novel approach to battery technology using nanostructured materials, achieving a 200% increase in energy density and 50% reduction in charging time. The study examines the scalability and economic feasibility of these technologies, with promising implications for electric vehicles and grid storage systems."
+  },
+  {
+    title: "Social Media Impact on Scientific Communication",
+    authors: "Olivia Martinez, James Wilson, Aisha Khan",
+    keywords: "Science Communication, Social Media, Public Engagement",
+    ratings: "83%",
+    reviews: 145,
+    abstract: "This study analyzes the evolving role of social media in scientific communication and public engagement. Through a comprehensive survey of 10,000 scientists and analysis of 1 million social media interactions, we examine the effectiveness of different platforms in disseminating scientific information. The research reveals significant improvements in public understanding of complex scientific concepts and increased engagement with scientific content. Our findings provide valuable insights for science communication strategies in the digital age."
+  }
 ].map((journal, index) => ({
   ...journal,
   id: index + 1,

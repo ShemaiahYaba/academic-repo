@@ -1,11 +1,14 @@
 import React from "react";
 import PopularAuthors from "@/pages/Posts/PopularAuthors";
 import UserCard from "@/pages/Posts/UserCard";
+import { useAuth } from "@/contexts/AuthContext";
 
 const LeftPanel: React.FC = () => {
+  const { user } = useAuth();
+
   return (
     <div className="flex flex-col gap-4">
-      <UserCard />
+      {user?.email && <UserCard userEmail={user.email} />}
       <PopularAuthors />
     </div>
   );

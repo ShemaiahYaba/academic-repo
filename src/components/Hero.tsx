@@ -10,18 +10,18 @@ const Hero = () => {
       {/* Text */}
       <div className="absolute inset-0 flex flex-col  gap-y-1.5 p-10 md:p-5 justify-center">
         <h1 className="text-white text-xl md:text-6xl lg:text-3xl font-bold ">
-          Digital Repository
+          Journal Of Tetra-Science
         </h1>
         <p className="text-white font-bold">
-          Welcome, this repository provides access to a diverse range of
-          research <br />
-          materials, including journal articles, conference proceedings,
-          practice-based <br />
-          research, videos, audio recordings, artworks,exhibitions, books, book
-          chapters, <br />
-          theses, and datasets. Full-text access is available where permitted,
-          alongside <br />
-          detailed citations for restricted materials
+          Advancing interdisciplinary research through innovative scholarship and
+          <br />
+          comprehensive academic resources. Our repository curates cutting-edge
+          <br />
+          research across multiple domains, from traditional academic papers to
+          <br />
+          digital media and creative works. Discover, explore, and contribute to
+          <br />
+          the future of scientific knowledge.
         </p>
       </div>
     </div>

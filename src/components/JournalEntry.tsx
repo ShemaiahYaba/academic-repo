@@ -44,10 +44,6 @@ const JournalEntry = ({ id, title, authors, keywords, ratings, reviews }: Journa
 
       {/* Right Section */}
       <div className="flex flex-col items-start text-left left-16 font-light gap-y-1.5 ml-1">
-        <a href="#" className="hover:underline">Read Online</a>
-        <a href="#" className="hover:underline">Download</a>
-        <a href="#" className="hover:underline">Export Citation</a>
-        <a href="#" className="hover:underline">About the Journal</a>
         <p className="mt-2 item-start">
           <span className="font-light">Ratings: <br /> </span>
           {ratings} ({reviews} reviews)

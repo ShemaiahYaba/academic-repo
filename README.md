@@ -25,14 +25,6 @@ Welcome to JOTS! This is a free and open platform for students, researchers, and
 - Content moderation
 - Smarter tagging and recommendations
 
-## Contributing
-
-Want to help improve EduArchive? Fork the repo, make your changes, and open a pull request. All contributions are welcome!
-
 ## License
 
-This project is licensed under the MIT License.
-
----
-
-Made with ❤️ for students, by students.
+This project is licensed under HEXA.

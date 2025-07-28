@@ -1,4 +1,4 @@
-# 📚 Academic Repository (EduArchive)
+# 📚 Academic Repository (Journal of TetraScience)
 
 Welcome to EduArchive! This is a free and open platform for students, researchers, and lifelong learners to share and discover academic documents. You can upload journals, research papers, theses, essays, and more. Connect with others, explore new topics, and contribute to a growing academic community.
 

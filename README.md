@@ -1,9 +1,4 @@
-Absolutely! Here's a clean and professional README template you can use for your academic repository project. It includes sections for an overview, features, tech stack, setup, and contribution guidelines.
-
----
-
-```markdown
-# 📚 Academic Repository (EduArchive)
+# 📚 Academic Repository (Journal of TetraScience)
 
 An open-source academic repository with social features. Users can upload, share, and discover academic documents such as journals, research papers, theses, and essays. Built for a community of students, researchers, and lifelong learners.
 

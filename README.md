@@ -25,6 +25,4 @@ Welcome to JOTS! This is a free and open platform for students, researchers, and
 - Content moderation
 - Smarter tagging and recommendations
 
-## License
-
 This project is licensed under HEXA.

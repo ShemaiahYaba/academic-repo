@@ -22,7 +22,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
   const subscriptionRefsRef = useRef<Map<string, any>>(new Map());
 
   // Cache management
-  const getCachedData = useCallback(<T>(key: string): T | null => {
+  const getCachedData = useCallback(<T,>(key: string): T | null => {
     const entry = cache[key];
     if (!entry) return null;
 
@@ -43,7 +43,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
     return entry.data as T;
   }, [cache]);
 
-  const setCachedData = useCallback(<T>(key: string, data: T, ttl: number = 5 * 60 * 1000): void => {
+  const setCachedData = useCallback(<T,>(key: string, data: T, ttl: number = 5 * 60 * 1000): void => {
     const entry: CacheEntry<T> = {
       data,
       timestamp: new Date(),
@@ -96,7 +96,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
       supabaseSubscription = supabase
         .channel(subscriptionId)
         .on(
-          'postgres_changes',
+          'postgres_changes' as any,
           {
             event,
             schema: 'public',
@@ -110,7 +110,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
       supabaseSubscription = supabase
         .channel(subscriptionId)
         .on(
-          'postgres_changes',
+          'postgres_changes' as any,
           {
             event,
             schema: 'public',

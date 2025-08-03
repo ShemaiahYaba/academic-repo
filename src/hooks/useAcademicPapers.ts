@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useSupabase } from './useSupabase';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,47 +9,44 @@ type AcademicPaperInsert = Database['public']['Tables']['academic_papers']['Inse
 type AcademicPaperUpdate = Database['public']['Tables']['academic_papers']['Update'];
 
 export const useAcademicPapers = () => {
-  const { query, mutate } = useSupabase();
+  const { supabase, query, mutate } = useSupabase();
   const { subscribe, unsubscribe } = useData();
   const { user, hasPermission } = useAuth();
 
   // Fetch all papers
   const fetchPapers = useCallback(async () => {
     return await query<AcademicPaper[]>(
-      () => supabase
+      async () => await supabase
         .from('academic_papers')
         .select('*')
         .order('created_at', { ascending: false }),
-      'fetchPapers',
-      'papers'
+      'fetchPapers'
     );
-  }, [query]);
+  }, [query, supabase]);
 
   // Fetch paper by ID
   const fetchPaperById = useCallback(async (id: string) => {
     return await query<AcademicPaper>(
-      () => supabase
+      async () => await supabase
         .from('academic_papers')
         .select('*')
         .eq('id', id)
         .single(),
-      'fetchPaperById',
       `paper_${id}`
     );
-  }, [query]);
+  }, [query, supabase]);
 
   // Fetch papers by user
   const fetchPapersByUser = useCallback(async (userId: string) => {
     return await query<AcademicPaper[]>(
-      () => supabase
+      async () => await supabase
         .from('academic_papers')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false }),
-      'fetchPapersByUser',
       `papers_user_${userId}`
     );
-  }, [query]);
+  }, [query, supabase]);
 
   // Create new paper
   const createPaper = useCallback(async (paper: AcademicPaperInsert) => {
@@ -62,7 +59,7 @@ export const useAcademicPapers = () => {
     }
 
     return await mutate<AcademicPaper>(
-      () => supabase
+      async () => await supabase
         .from('academic_papers')
         .insert([{ ...paper, user_id: user.id }])
         .select()
@@ -70,7 +67,7 @@ export const useAcademicPapers = () => {
       'createPaper',
       'Paper created successfully'
     );
-  }, [user, hasPermission, mutate]);
+  }, [user, hasPermission, mutate, supabase]);
 
   // Update paper
   const updatePaper = useCallback(async (id: string, updates: AcademicPaperUpdate) => {
@@ -89,7 +86,7 @@ export const useAcademicPapers = () => {
     }
 
     return await mutate<AcademicPaper>(
-      () => supabase
+      async () => await supabase
         .from('academic_papers')
         .update(updates)
         .eq('id', id)
@@ -98,7 +95,7 @@ export const useAcademicPapers = () => {
       'updatePaper',
       'Paper updated successfully'
     );
-  }, [user, hasPermission, mutate, fetchPaperById]);
+  }, [user, hasPermission, mutate, fetchPaperById, supabase]);
 
   // Delete paper
   const deletePaper = useCallback(async (id: string) => {
@@ -117,7 +114,7 @@ export const useAcademicPapers = () => {
     }
 
     return await mutate<AcademicPaper>(
-      () => supabase
+      async () => await supabase
         .from('academic_papers')
         .delete()
         .eq('id', id)
@@ -126,53 +123,55 @@ export const useAcademicPapers = () => {
       'deletePaper',
       'Paper deleted successfully'
     );
-  }, [user, hasPermission, mutate, fetchPaperById]);
+  }, [user, hasPermission, mutate, fetchPaperById, supabase]);
 
   // Search papers
-  const searchPapers = useCallback(async (query: string, filters?: {
+  const searchPapers = useCallback(async (searchQuery: string, filters?: {
     authors?: string[];
     keywords?: string[];
     journal?: string;
     dateFrom?: string;
     dateTo?: string;
   }) => {
-    let supabaseQuery = supabase
-      .from('academic_papers')
-      .select('*');
-
-    // Text search
-    if (query) {
-      supabaseQuery = supabaseQuery.or(
-        `title.ilike.%${query}%,abstract.ilike.%${query}%`
-      );
-    }
-
-    // Apply filters
-    if (filters?.authors?.length) {
-      supabaseQuery = supabaseQuery.overlaps('authors', filters.authors);
-    }
-
-    if (filters?.keywords?.length) {
-      supabaseQuery = supabaseQuery.overlaps('keywords', filters.keywords);
-    }
-
-    if (filters?.journal) {
-      supabaseQuery = supabaseQuery.eq('journal', filters.journal);
-    }
-
-    if (filters?.dateFrom) {
-      supabaseQuery = supabaseQuery.gte('published_date', filters.dateFrom);
-    }
-
-    if (filters?.dateTo) {
-      supabaseQuery = supabaseQuery.lte('published_date', filters.dateTo);
-    }
-
     return await query<AcademicPaper[]>(
-      () => supabaseQuery.order('created_at', { ascending: false }),
+      async () => {
+        let supabaseQuery = supabase
+          .from('academic_papers')
+          .select('*');
+
+        // Text search
+        if (searchQuery) {
+          supabaseQuery = supabaseQuery.or(
+            `title.ilike.%${searchQuery}%,abstract.ilike.%${searchQuery}%`
+          );
+        }
+
+        // Apply filters
+        if (filters?.authors?.length) {
+          supabaseQuery = supabaseQuery.overlaps('authors', filters.authors);
+        }
+
+        if (filters?.keywords?.length) {
+          supabaseQuery = supabaseQuery.overlaps('keywords', filters.keywords);
+        }
+
+        if (filters?.journal) {
+          supabaseQuery = supabaseQuery.eq('journal', filters.journal);
+        }
+
+        if (filters?.dateFrom) {
+          supabaseQuery = supabaseQuery.gte('published_date', filters.dateFrom);
+        }
+
+        if (filters?.dateTo) {
+          supabaseQuery = supabaseQuery.lte('published_date', filters.dateTo);
+        }
+
+        return await supabaseQuery.order('created_at', { ascending: false });
+      },
       'searchPapers'
     );
-  }, [query]);
+  }, [query, supabase]);
 
   // Subscribe to real-time updates
   const subscribeToPapers = useCallback((callback: (payload: any) => void) => {
@@ -207,11 +206,52 @@ export const useAcademicPapers = () => {
     return subscriptionId;
   }, [subscribe]);
 
+  // Get papers with pagination
+  const fetchPapersPaginated = useCallback(async (page: number = 1, limit: number = 10) => {
+    const offset = (page - 1) * limit;
+    
+    return await query<AcademicPaper[]>(
+      async () => await supabase
+        .from('academic_papers')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1),
+      `papers_page_${page}_limit_${limit}`
+    );
+  }, [query, supabase]);
+
+  // Get papers by journal
+  const fetchPapersByJournal = useCallback(async (journal: string) => {
+    return await query<AcademicPaper[]>(
+      async () => await supabase
+        .from('academic_papers')
+        .select('*')
+        .eq('journal', journal)
+        .order('created_at', { ascending: false }),
+      `papers_journal_${journal}`
+    );
+  }, [query, supabase]);
+
+  // Get papers by author
+  const fetchPapersByAuthor = useCallback(async (author: string) => {
+    return await query<AcademicPaper[]>(
+      async () => await supabase
+        .from('academic_papers')
+        .select('*')
+        .contains('authors', [author])
+        .order('created_at', { ascending: false }),
+      `papers_author_${author}`
+    );
+  }, [query, supabase]);
+
   return {
     // Query operations
     fetchPapers,
     fetchPaperById,
     fetchPapersByUser,
+    fetchPapersPaginated,
+    fetchPapersByJournal,
+    fetchPapersByAuthor,
     searchPapers,
     
     // Mutation operations

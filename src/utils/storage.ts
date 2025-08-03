@@ -1,4 +1,12 @@
 // Storage utility for managing localStorage and sessionStorage
+
+// Define cache entry type
+interface CacheEntry {
+  data: any;
+  timestamp: number;
+  ttl: number;
+}
+
 export class StorageManager {
   private storage: Storage;
 
@@ -55,6 +63,27 @@ export class StorageManager {
   size(): number {
     return this.storage.length;
   }
+
+  // Implement Storage interface methods
+  get length(): number {
+    return this.storage.length;
+  }
+
+  getItem(key: string): string | null {
+    return this.storage.getItem(key);
+  }
+
+  key(index: number): string | null {
+    return this.storage.key(index);
+  }
+
+  setItem(key: string, value: string): void {
+    this.storage.setItem(key, value);
+  }
+
+  removeItem(key: string): void {
+    this.storage.removeItem(key);
+  }
 }
 
 // Pre-configured instances
@@ -76,9 +105,9 @@ export const storage = {
   setUserPreferences: (preferences: any) => localStorage.set('userPreferences', preferences),
 
   // Cache management
-  getCache: (key: string) => localStorage.get(key),
+  getCache: (key: string) => localStorage.get<CacheEntry>(key),
   setCache: (key: string, value: any, ttl?: number) => {
-    const cacheEntry = {
+    const cacheEntry: CacheEntry = {
       data: value,
       timestamp: Date.now(),
       ttl: ttl || 5 * 60 * 1000, // Default 5 minutes
@@ -93,7 +122,7 @@ export const storage = {
 
     keys.forEach(key => {
       if (key.startsWith('cache_')) {
-        const entry = localStorage.get(key);
+        const entry = localStorage.get<CacheEntry>(key);
         if (entry && entry.timestamp && (now - entry.timestamp) > entry.ttl) {
           localStorage.remove(key);
         }

@@ -1,10 +1,14 @@
 import type { User, Session } from '@supabase/supabase-js';
-import type { Database } from './supabase';
+// import type { Database } from './supabase';
+import { ReactNode } from 'react';
 
 // Authentication Types
 export type UserRole = 'admin' | 'user' | 'moderator';
 
 export interface UserProfile {
+  username: any;
+  last_name: ReactNode;
+  first_name: ReactNode;
   id: string;
   email: string;
   full_name: string | null;

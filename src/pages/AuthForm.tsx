@@ -26,20 +26,20 @@ const AuthForm = () => {
 
     try {
       if (isSignUp) {
-        await signUp(form.email, form.password);
-        success("Account created successfully! Please check your email to verify your account.");
+        await signUp(form.email, form.password, { email: form.email });
+        success("Account Created", "Account created successfully! Please check your email to verify your account.");
         setIsSignUp(false);
         setForm({ email: "", password: "" });
       } else {
         await signIn(form.email, form.password);
-        success("Welcome back! You have been signed in successfully.");
+        success("Welcome Back", "You have been signed in successfully.");
         navigate("/");
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
-        showError(err.message);
+        showError("Authentication Error", err.message);
       } else {
-        showError("An unexpected error occurred. Please try again.");
+        showError("Authentication Error", "An unexpected error occurred. Please try again.");
       }
     } finally {
       setIsSubmitting(false);
@@ -49,7 +49,7 @@ const AuthForm = () => {
 
   const handlePasswordReset = async () => {
     if (!form.email) {
-      showError("Please provide your email address to reset your password.");
+      showError("Email Required", "Please provide your email address to reset your password.");
       return;
     }
     
@@ -58,12 +58,12 @@ const AuthForm = () => {
     
     try {
       await resetPassword(form.email);
-      success("Password reset email sent! Please check your inbox.");
+      success("Password Reset Sent", "Password reset email sent! Please check your inbox.");
     } catch (err: unknown) {
       if (err instanceof Error) {
-        showError(err.message);
+        showError("Password Reset Error", err.message);
       } else {
-        showError("An unexpected error occurred. Please try again.");
+        showError("Password Reset Error", "An unexpected error occurred. Please try again.");
       }
     } finally {
       setIsSubmitting(false);
@@ -98,7 +98,7 @@ const AuthForm = () => {
               </>
             ) : (
               <>
-                Don’t have an account?{" "}
+                Don't have an account?{" "}
                 <button
                   onClick={() => setIsSignUp(true)}
                   className="text-black font-medium"
@@ -168,7 +168,7 @@ const AuthForm = () => {
             >
               {isSubmitting || isLoading ? (
                 <>
-                  <LoadingSpinner size="small" className="mr-2" />
+                  <LoadingSpinner size="sm" className="mr-2" />
                   {isSignUp ? "Creating Account..." : "Signing In..."}
                 </>
               ) : (

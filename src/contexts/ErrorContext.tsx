@@ -110,14 +110,14 @@ export const ErrorProvider = ({ children }: ErrorProviderProps) => {
   cleanupRef.current = cleanup;
 
   // Cleanup on unmount
-  const cleanupOnUnmount = useCallback(() => {
-    return () => {
-      cleanupRef.current();
-    };
-  }, []);
+  // const cleanupOnUnmount = useCallback(() => {
+  //   return () => {
+  //     cleanupRef.current();
+  //   };
+  // }, []);
 
-  // Set up cleanup effect
-  const cleanupEffect = cleanupOnUnmount();
+  // // Set up cleanup effect
+  // const cleanupEffect = cleanupOnUnmount();
 
   const contextValue: ErrorContextType = {
     errors,

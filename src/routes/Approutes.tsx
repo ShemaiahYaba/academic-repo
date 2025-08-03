@@ -13,13 +13,13 @@ const AppRoutes = () => {
   if (!isInitialized) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="large" text="Initializing..." />
+        <LoadingSpinner size="lg" text="Initializing..." />
       </div>
     );
   }
 
   return (
-    <Suspense fallback={<LoadingSpinner size="large" text="Loading..." />}>
+    <Suspense fallback={<LoadingSpinner size="lg" text="Loading..." />}>
       <Routes>
         {isAuthenticated ? (
           <Route path="/*" element={<ProtectedRoutes />} />

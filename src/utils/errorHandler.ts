@@ -15,16 +15,17 @@ export function parseSupabaseError(error: PostgrestError | AuthError | Error): A
   // Handle Supabase Auth errors
   if ('status' in error && 'name' in error && error.name === 'AuthApiError') {
     const authError = error as AuthError;
+    const status = authError.status || 500; // Default to 500 if status is undefined
     return {
       ...baseError,
       id: generateErrorId(),
       timestamp: new Date(),
       retryCount: 0,
       category: 'authentication',
-      severity: getAuthErrorSeverity(authError.status),
-      retryable: isAuthErrorRetryable(authError.status),
-      title: getAuthErrorTitle(authError.status),
-      message: getAuthErrorMessage(authError.status, authError.message),
+      severity: getAuthErrorSeverity(status),
+      retryable: isAuthErrorRetryable(status),
+      title: getAuthErrorTitle(status),
+      message: getAuthErrorMessage(status, authError.message),
     };
   }
 

@@ -5,6 +5,7 @@ import { useNotification } from '@/contexts/NotificationContext';
 import { useData } from '@/contexts/DataContext';
 import { parseSupabaseError } from '@/utils/errorHandler';
 import type { PostgrestError, AuthError } from '@supabase/supabase-js';
+import type { AppError } from '@/types/global';
 
 interface UseSupabaseOptions {
   showNotifications?: boolean;

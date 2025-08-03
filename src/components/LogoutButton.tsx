@@ -1,24 +1,33 @@
 // components/LogoutButton.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext"; // Use AuthContext
+import { useAuth } from "@/contexts/AuthContext";
+import { useNotification } from "@/contexts/NotificationContext";
+import { useUI } from "@/contexts/UIContext";
 import { MdOutlineLogout } from "react-icons/md";
 
 const LogoutButton: React.FC = () => {
-  const { signOut } = useAuth(); // Access signOut from context
+  const { signOut } = useAuth();
   const navigate = useNavigate();
+  const { success, error: showError } = useNotification();
+  const { setLoading } = useUI();
 
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
+    setLoading(true);
+    
     try {
-      await signOut(); // Call signOut from context
-      navigate("/login", { replace: true }); // Redirect to login page after logout
+      await signOut();
+      success("You have been successfully logged out.");
+      navigate("/login", { replace: true });
     } catch (error) {
       if (error instanceof Error) {
-        alert("Error logging out: " + error.message);
+        showError("Error logging out: " + error.message);
       } else {
-        alert("Error logging out.");
+        showError("An error occurred while logging out.");
       }
+    } finally {
+      setLoading(false);
     }
   };
 

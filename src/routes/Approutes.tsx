@@ -1,48 +1,34 @@
 // routes/AppRoutes.tsx
-import { Suspense, useEffect, useState } from "react";
+import { Suspense } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthProvider";
-import { supabase } from "@/supabaseClient";
-import Preloader from "@/components/Preloader";
+import { useAuth } from "@/contexts/AuthContext";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import ProtectedRoutes from "@/routes/ProtectedRoutes";
 import PublicRoutes from "@/routes/PublicRoutes";
 
 const AppRoutes = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAuthenticated, isInitialized } = useAuth();
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (
-        _event: import("@supabase/supabase-js").AuthChangeEvent,
-        session: import("@supabase/supabase-js").Session | null
-      ) => {
-        setIsAuthenticated(!!session);
-        console.log("Auth change:", _event, session);
-      }
+  // Show loading spinner while auth state is being initialized
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="large" text="Initializing..." />
+      </div>
     );
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
+  }
 
   return (
-    <AuthProvider>
-      <Suspense fallback={<Preloader />}>
-        <Routes>
-          {isAuthenticated ? (
-            <Route path="/*" element={<ProtectedRoutes />} />
-          ) : (
-            <Route path="/*" element={<PublicRoutes />} />
-          )}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </Suspense>
-    </AuthProvider>
+    <Suspense fallback={<LoadingSpinner size="large" text="Loading..." />}>
+      <Routes>
+        {isAuthenticated ? (
+          <Route path="/*" element={<ProtectedRoutes />} />
+        ) : (
+          <Route path="/*" element={<PublicRoutes />} />
+        )}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </Suspense>
   );
 };
 

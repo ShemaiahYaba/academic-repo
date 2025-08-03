@@ -1,14 +1,20 @@
 import ReactDOM from "react-dom/client";
-
-import App from "./App";
 import { BrowserRouter } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthProvider";
+import { AppProvider } from "@/providers/AppProvider";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { NotificationContainer } from "@/components/NotificationContainer";
+import { GlobalLoadingSpinner } from "@/components/LoadingSpinner";
+import App from "./App";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <BrowserRouter>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  </BrowserRouter>
+  <ErrorBoundary>
+    <BrowserRouter>
+      <AppProvider>
+        <App />
+        <NotificationContainer />
+        <GlobalLoadingSpinner />
+      </AppProvider>
+    </BrowserRouter>
+  </ErrorBoundary>
 );

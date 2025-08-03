@@ -1,6 +1,7 @@
 // routes/ProtectedRoutes.tsx
 import { Route, Routes } from "react-router-dom";
 import Layout from "@/components/Layout";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { lazy } from "react";
 
 const Home = lazy(() => import("@/pages/Home"));
@@ -21,89 +22,111 @@ const ProtectedRoutes = () => (
       <Route
         path="/"
         element={
-          <Layout>
-            <Home />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <Home />
+            </Layout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/journals"
         element={
-          <Layout>
-            <Journals />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <Journals />
+            </Layout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/articles"
         element={
-          <Layout>
-            <Articles />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <Articles />
+            </Layout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/post"
         element={
-          <Layout>
-            <Post />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <Post />
+            </Layout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/editorialteam"
         element={
-          <Layout>
-            <EditorialTeam />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <EditorialTeam />
+            </Layout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/about"
         element={
-          <Layout>
-            <About />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <About />
+            </Layout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/journal/:id"
         element={
-          <Layout>
-            <JournalDetail />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <JournalDetail />
+            </Layout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/notifications"
         element={
-          <Layout>
-            <Notification />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <Notification />
+            </Layout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/profile"
         element={
-          <Layout>
-            <Profile />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <Profile />
+            </Layout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/support"
         element={
-          <Layout>
-            <Support />
-          </Layout>
+          <ProtectedRoute>
+            <Layout>
+              <Support />
+            </Layout>
+          </ProtectedRoute>
         }
       />
       <Route
         path="/upload-journal"
         element={
-          <Layout>
-            <UploadJournal />
-          </Layout>
+          <ProtectedRoute requiredRole="admin">
+            <Layout>
+              <UploadJournal />
+            </Layout>
+          </ProtectedRoute>
         }
       />
     </Routes>

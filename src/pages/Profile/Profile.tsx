@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNotification } from "@/contexts/NotificationContext";
+import { useUI } from "@/contexts/UIContext";
+import { useSupabase } from "@/hooks/useSupabase";
 import { ProfileImageUpload } from "@/components/ProfileImageUpload";
 import { ProfileForm } from "@/pages/Profile/ProfileForm";
 import { marginLineHorizontal } from "@/constants/images";
-import { doc, setDoc, getDoc } from "firebase/firestore";
-import { db } from "@/firebase";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 const DEFAULT_PROFILE_IMAGE = "https://via.placeholder.com/150";
 
 const Profile: React.FC = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const { success, error: showError } = useNotification();
+  const { setLoading } = useUI();
+  const { query, mutate } = useSupabase();
+  
   const [profileImage, setProfileImage] = useState<string | undefined>(
     DEFAULT_PROFILE_IMAGE
   );
@@ -25,28 +31,50 @@ const Profile: React.FC = () => {
     researchField: "",
     username: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   // Load existing user profile on mount
   useEffect(() => {
     if (!user) return;
 
     const loadUserProfile = async () => {
-      const userRef = doc(db, "users", user.email!);
-      const docSnap = await getDoc(userRef);
+      setIsLoading(true);
+      try {
+        const { data, error } = await query(
+          'profiles',
+          'select',
+          { eq: { column: 'id', value: user.id } }
+        );
 
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setFormData((prev) => ({
-          ...prev,
-          ...data,
-          taxIdCountry: data.taxIdCountry || "Nigeria",
-        }));
-        setProfileImage(data.profileImage || DEFAULT_PROFILE_IMAGE);
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          const profileData = data[0];
+          setFormData((prev) => ({
+            ...prev,
+            firstName: profileData.first_name || "",
+            lastName: profileData.last_name || "",
+            middlename: profileData.middle_name || "",
+            mobileNumber: profileData.mobile_number || "",
+            bio: profileData.bio || "",
+            school: profileData.school || "",
+            degree: profileData.degree || "",
+            fieldOfStudy: profileData.field_of_study || "",
+            researchField: profileData.research_field || "",
+            username: profileData.username || "",
+          }));
+          setProfileImage(profileData.avatar_url || DEFAULT_PROFILE_IMAGE);
+        }
+      } catch (error) {
+        showError("Failed to load profile data.");
+        console.error("Error loading profile:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadUserProfile();
-  }, [user]);
+  }, [user, query, showError]);
 
   // Handle field input change (no autosave)
   const handleInputChange = (
@@ -71,23 +99,50 @@ const Profile: React.FC = () => {
     setFormData(updatedForm);
   };
 
-  // Manually save form to Firestore
+  // Manually save form to Supabase
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
+    setLoading(true);
     try {
-      const userRef = doc(db, "users", user.email!);
-      await setDoc(userRef, {
-        ...formData,
-        profileImage,
-      });
-      alert("Profile saved successfully!");
+      const { error } = await mutate(
+        'profiles',
+        'upsert',
+        {
+          id: user.id,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          middle_name: formData.middlename,
+          mobile_number: formData.mobileNumber,
+          bio: formData.bio,
+          school: formData.school,
+          degree: formData.degree,
+          field_of_study: formData.fieldOfStudy,
+          research_field: formData.researchField,
+          username: formData.username,
+          avatar_url: profileImage,
+          updated_at: new Date().toISOString(),
+        }
+      );
+
+      if (error) throw error;
+      success("Profile saved successfully!");
     } catch (err) {
       console.error("Error saving profile:", err);
-      alert("Failed to save profile.");
+      showError("Failed to save profile. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner size="large" text="Loading profile..." />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4">

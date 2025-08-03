@@ -1,55 +1,73 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNotification } from "@/contexts/NotificationContext";
+import { useUI } from "@/contexts/UIContext";
 import { loginbackground } from "@/constants/images";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import React from "react";
 
 const AuthForm = () => {
   const navigate = useNavigate();
-  const { signUp, signIn, resetPassword } = useAuth();
+  const { signUp, signIn, resetPassword, isLoading } = useAuth();
+  const { success, error: showError } = useNotification();
+  const { setLoading } = useUI();
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [isSignUp, setIsSignUp] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setIsSubmitting(true);
+    setLoading(true);
 
     try {
       if (isSignUp) {
         await signUp(form.email, form.password);
-        // If signUp throws on error, no need to check error property
-        alert("Account created! Check your inbox to verify.");
+        success("Account created successfully! Please check your email to verify your account.");
         setIsSignUp(false);
+        setForm({ email: "", password: "" });
       } else {
         await signIn(form.email, form.password);
-        // If signIn throws on error, no need to check error property
+        success("Welcome back! You have been signed in successfully.");
         navigate("/");
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message);
+        showError(err.message);
       } else {
-        setError("An unexpected error occurred.");
+        showError("An unexpected error occurred. Please try again.");
       }
+    } finally {
+      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   const handlePasswordReset = async () => {
-    if (!form.email) return setError("Provide your email to reset password.");
+    if (!form.email) {
+      showError("Please provide your email address to reset your password.");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setLoading(true);
+    
     try {
-      const { error } = await resetPassword(form.email);
-      if (error) throw error;
-      alert("Password reset email sent!");
+      await resetPassword(form.email);
+      success("Password reset email sent! Please check your inbox.");
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message);
+        showError(err.message);
       } else {
-        setError("An unexpected error occurred.");
+        showError("An unexpected error occurred. Please try again.");
       }
+    } finally {
+      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
@@ -91,9 +109,7 @@ const AuthForm = () => {
             )}
           </p>
 
-          {error && (
-            <p className="text-red-500 text-sm text-center mb-4">{error}</p>
-          )}
+
 
           <form onSubmit={handleSubmit}>
             <input
@@ -136,19 +152,28 @@ const AuthForm = () => {
                 </label>
                 <button
                   type="button"
+                  disabled={isSubmitting || isLoading}
                   onClick={handlePasswordReset}
-                  className="text-black font-light"
+                  className="text-black font-light hover:underline disabled:text-gray-400 disabled:cursor-not-allowed"
                 >
-                  Forgot Password?
+                  {isSubmitting ? "Sending..." : "Forgot Password?"}
                 </button>
               </div>
             )}
 
             <button
               type="submit"
-              className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800"
+              disabled={isSubmitting || isLoading}
+              className="w-full bg-black text-white py-3 rounded-lg hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              {isSignUp ? "Sign up" : "Sign in"}
+              {isSubmitting || isLoading ? (
+                <>
+                  <LoadingSpinner size="small" className="mr-2" />
+                  {isSignUp ? "Creating Account..." : "Signing In..."}
+                </>
+              ) : (
+                <>{isSignUp ? "Sign up" : "Sign in"}</>
+              )}
             </button>
           </form>
 

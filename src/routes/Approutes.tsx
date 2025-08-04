@@ -7,6 +7,7 @@ import ProtectedRoutes from "@/routes/ProtectedRoutes";
 import PublicRoutes from "@/routes/PublicRoutes";
 
 const AppRoutes = () => {
+  console.log("AppRoutes: Rendering...");
   const { isAuthenticated, isInitialized } = useAuth();
 
   // Show loading spinner while auth state is being initialized

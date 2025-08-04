@@ -2,7 +2,7 @@
 -- This table stores user profile information linked to Supabase Auth users
 
 -- Create the profiles table
-CREATE TABLE IF NOT EXISTS profiles (
+CREATE TABLE IF NOT EXISTS profiles ( 
     id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
     email TEXT NOT NULL UNIQUE,
     full_name TEXT,
@@ -16,6 +16,16 @@ CREATE TABLE IF NOT EXISTS profiles (
 CREATE INDEX IF NOT EXISTS idx_profiles_email ON profiles(email);
 CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);
 CREATE INDEX IF NOT EXISTS idx_profiles_created_at ON profiles(created_at);
+
+-- Function to get the role of the current user
+CREATE OR REPLACE FUNCTION get_user_role()
+RETURNS TEXT AS $$
+BEGIN
+    RETURN (
+        SELECT role FROM profiles WHERE id = auth.uid()
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
@@ -36,30 +46,15 @@ CREATE POLICY "Users can insert own profile" ON profiles
 
 -- Policy: Admins can view all profiles
 CREATE POLICY "Admins can view all profiles" ON profiles
-    FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    FOR SELECT USING (get_user_role() = 'admin');
 
 -- Policy: Admins can update all profiles
 CREATE POLICY "Admins can update all profiles" ON profiles
-    FOR UPDATE USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    FOR UPDATE USING (get_user_role() = 'admin');
 
 -- Policy: Admins can delete profiles
 CREATE POLICY "Admins can delete profiles" ON profiles
-    FOR DELETE USING (
-        EXISTS (
-            SELECT 1 FROM profiles 
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
+    FOR DELETE USING (get_user_role() = 'admin');
 
 -- Create a function to automatically update the updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -99,4 +94,4 @@ COMMENT ON COLUMN profiles.full_name IS 'User full name';
 COMMENT ON COLUMN profiles.avatar_url IS 'URL to user profile picture';
 COMMENT ON COLUMN profiles.role IS 'User role: admin, editor, or user';
 COMMENT ON COLUMN profiles.created_at IS 'Timestamp when profile was created';
-COMMENT ON COLUMN profiles.updated_at IS 'Timestamp when profile was last updated'; 
+COMMENT ON COLUMN profiles.updated_at IS 'Timestamp when profile was last updated';

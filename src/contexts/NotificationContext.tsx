@@ -28,7 +28,7 @@ export const NotificationProvider = ({ children }: NotificationProviderProps) =>
       ...notification,
       id: generateNotificationId(),
       timestamp: new Date(),
-      position: notification.position || 'top-right',
+      position: notification.position || 'top-left',
       duration: notification.duration ?? 5000, // Default 5 seconds
     };
 

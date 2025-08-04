@@ -26,7 +26,7 @@ export const NotificationContainer = () => {
 
   // Group notifications by position
   const notificationsByPosition = notifications.reduce((acc, notification) => {
-    const position = notification.position || 'top-right';
+    const position = notification.position || 'top-left';
     if (!acc[position]) {
       acc[position] = [];
     }
@@ -39,7 +39,7 @@ export const NotificationContainer = () => {
       {Object.entries(notificationsByPosition).map(([position, positionNotifications]) => (
         <div
           key={position}
-          className={`fixed z-50 p-4 space-y-4 ${getPositionClasses(position as NotificationPosition)}`}
+          className={`fixed z-[9999] p-4 space-y-4 ${getPositionClasses(position as NotificationPosition)}`}
         >
           {positionNotifications.map((notification) => (
             <NotificationToast

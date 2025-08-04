@@ -26,14 +26,26 @@ const AuthForm = () => {
 
     try {
       if (isSignUp) {
-        await signUp(form.email, form.password, { email: form.email });
-        success("Account Created", "Account created successfully! Please check your email to verify your account.");
-        setIsSignUp(false);
-        setForm({ email: "", password: "" });
+        console.log("Attempting sign up with:", form.email);
+        const result = await signUp(form.email, form.password, { email: form.email });
+        console.log("Sign up result:", result);
+        if (result.error) {
+          showError("Sign Up Error", result.error.message);
+        } else {
+          success("Account Created", "Account created successfully! Please check your email to verify your account.");
+          setIsSignUp(false);
+          setForm({ email: "", password: "" });
+        }
       } else {
-        await signIn(form.email, form.password);
-        success("Welcome Back", "You have been signed in successfully.");
-        navigate("/");
+        console.log("Attempting sign in with:", form.email);
+        const result = await signIn(form.email, form.password);
+        console.log("Sign in result:", result);
+        if (result.error) {
+          showError("Sign In Error", result.error.message);
+        } else {
+          success("Welcome Back", "You have been signed in successfully.");
+          navigate("/");
+        }
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -57,8 +69,12 @@ const AuthForm = () => {
     setLoading(true);
     
     try {
-      await resetPassword(form.email);
-      success("Password Reset Sent", "Password reset email sent! Please check your inbox.");
+      const result = await resetPassword(form.email);
+      if (result.error) {
+        showError("Password Reset Error", result.error.message);
+      } else {
+        success("Password Reset Sent", "Password reset email sent! Please check your inbox.");
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         showError("Password Reset Error", err.message);
@@ -72,7 +88,7 @@ const AuthForm = () => {
   };
 
   return (
-    <div className="relative w-full h-screen">
+    <div className="relative w-full min-h-screen">
       <img
         src={loginbackground}
         className="absolute inset-0 w-full h-full object-cover"

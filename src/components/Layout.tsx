@@ -24,7 +24,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
         </div>
         {isAuthenticated && (
-          <div className="fixed bottom-26 right-6 z-50">
+          <div className="fixed bottom-26 right-6 z-40">
             <LogoutButton />
           </div>
         )}

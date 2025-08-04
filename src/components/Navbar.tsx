@@ -1,15 +1,16 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { primaryMenu, navbarLinks } from "@/constants/dataItems";
 import SearchBar from "@/components/Searchbar";
 
 const MenuItem = ({ label, href }: { label: string; href: string }) => (
   <li>
-    <a
-      href={href}
+    <Link
+      to={href}
       className="block py-2 px-3 text-white rounded-sm hover:bg-gray-700 md:hover:bg-transparent md:border-0 md:hover:text-blue-400 md:p-0"
     >
       {label}
-    </a>
+    </Link>
   </li>
 );
 
@@ -17,14 +18,14 @@ const Navbar = () => {
   return (
     <nav className="bg-gray-900 text-white border-b border-gray-800">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-        <a href="/" className="flex items-center space-x-3">
+        <Link to="/" className="flex items-center space-x-3">
           <img
             src="https://cdn-icons-png.flaticon.com/512/2103/2103633.png"
             className="h-8"
             alt="Flowbite Logo"
           />
           <span className="text-2xl font-semibold">JOTS</span>
-        </a>
+        </Link>
         {/* Mobile Menu Button */}
         <button
           data-collapse-toggle="navbar-default"
@@ -82,7 +83,7 @@ const Navbar = () => {
                     )}
                   </button>
                 ) : (
-                  <a href={link.href} className="block p-2">
+                  <Link to={link.href} className="block p-2">
                     {typeof link.icon === "string" ? (
                       <img
                         src={link.icon}
@@ -94,7 +95,7 @@ const Navbar = () => {
                         {link.icon && React.createElement(link.icon)}
                       </span>
                     )}
-                  </a>
+                  </Link>
                 )}
               </li>
             ))}

@@ -1,5 +1,5 @@
+// src/contexts/AuthProvider.tsx
 
-// contexts/AuthProvider.tsx
 import {
   useEffect,
   useState,
@@ -7,13 +7,12 @@ import {
   createContext,
   useContext,
 } from "react";
-import type { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
-import type { AuthContextType, UserProfile } from "@/types/global";
+import type { User, Session } from "@supabase/supabase-js";
+import type { AuthContextType, UserProfile, AppError } from "@/types/global";
 import { parseSupabaseError, logError } from "@/utils/errorHandler";
 import { useNavigate } from "react-router-dom";
 
-// Create the AuthContext with a default undefined value
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined
 );
@@ -28,49 +27,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
   const isAuthenticated = !!user && !!profile;
 
-  /**
-   * FIX: A single, robust function to clear all session data from the browser.
-   * This is crucial for preventing stale data from causing issues.
-   * Supabase uses localStorage and sometimes IndexedDB for session persistence.
-   */
+  // 🔹 Clears browser cache to avoid stale sessions
   const clearBrowserCache = useCallback(() => {
     console.log("Clearing all browser session cache...");
     localStorage.clear();
     sessionStorage.clear();
-    // Supabase's default DB name for auth is 'supabase.auth.token'
-    // but clearing all indexedDBs is safer if the name changes.
-    indexedDB.open("supabase.auth.token").onsuccess = (event) => {
-      const db = (event.target as IDBOpenDBRequest).result;
-      db.close();
-      indexedDB.deleteDatabase("supabase.auth.token");
-    };
+    indexedDB.deleteDatabase("supabase.auth.token");
   }, []);
 
-  /**
-   * FIX: The signOut function is now the single source of truth for logging out.
-   * It calls the Supabase client, clears React state, and wipes the browser cache.
-   */
+  // 🔹 Handles sign out completely
   const signOut = useCallback(async () => {
-    console.log("Signing out and clearing session...");
-    await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
-    setSession(null);
-    clearBrowserCache();
-    // Redirect to login to ensure a clean state.
-    navigate("/login");
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error("Error during sign out:", err);
+    } finally {
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      clearBrowserCache();
+      navigate("/login");
+    }
   }, [clearBrowserCache, navigate]);
 
-  /**
-   * Fetches the user profile from the database.
-   * This function is the core of our session validation logic.
-   * @param userId - The ID of the user to fetch.
-   * @returns The user profile or null if not found or on error.
-   */
+  // 🔹 Fetch user profile from DB
   const fetchUserProfile = useCallback(async (userId: string) => {
     try {
       const { data, error, status } = await supabase
@@ -79,42 +63,129 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         .eq("id", userId)
         .single();
 
-      // If RLS prevents access or the row doesn't exist, Supabase returns an error.
-      if (error && status !== 406) {
-        // 406 is a "Not Acceptable" error when single() finds no rows, which is expected.
-        throw error;
-      }
-
-      return data; // Returns profile data or null
+      if (error && status !== 406) throw error;
+      return data as UserProfile | null;
     } catch (err) {
       logError(parseSupabaseError(err as Error));
       return null;
     }
   }, []);
 
-  /**
-   * FIX: The main initialization and session validation logic.
-   * This runs only once when the component mounts.
-   */
+  // 🔹 Sign up new user
+  const signUp = useCallback(async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      if (error) {
+        return { user: null, error: parseSupabaseError(error) };
+      }
+      return { user: data.user ?? null, error: null };
+    } catch (err) {
+      return { user: null, error: parseSupabaseError(err as Error) };
+    }
+  }, []);
+
+  // 🔹 Sign in existing user
+  const signIn = useCallback(async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        return { user: null, error: parseSupabaseError(error) };
+      }
+      return { user: data.user ?? null, error: null };
+    } catch (err) {
+      return { user: null, error: parseSupabaseError(err as Error) };
+    }
+  }, []);
+
+  // 🔹 Reset password
+  const resetPassword = useCallback(async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      return { error: error ? parseSupabaseError(error) : null };
+    } catch (err) {
+      return { error: parseSupabaseError(err as Error) };
+    }
+  }, []);
+
+  // 🔹 Update user profile
+  const updateProfile = useCallback(
+    async (updates: Partial<UserProfile>) => {
+      if (!user) {
+        return {
+          profile: null,
+          error: {
+            message: "User not authenticated",
+            severity: "medium",
+            category: "authentication",
+            timestamp: new Date(),
+            retryable: false,
+            retryCount: 0,
+            maxRetries: 0,
+          } as AppError,
+        };
+      }
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .update(updates)
+          .eq("id", user.id)
+          .select()
+          .single();
+
+        if (error) {
+          return { profile: null, error: parseSupabaseError(error) };
+        }
+        setProfile(data);
+        return { profile: data as UserProfile, error: null };
+      } catch (err) {
+        return { profile: null, error: parseSupabaseError(err as Error) };
+      }
+    },
+    [user]
+  );
+
+  // 🔹 Refresh session manually
+  const refreshSession = useCallback(async () => {
+    const { data, error } = await supabase.auth.refreshSession();
+    if (!error && data.session) {
+      setSession(data.session);
+      setUser(data.session.user);
+    }
+  }, []);
+
+  // 🔹 Role-based access control
+  const hasRole = useCallback(
+    (role: string) => profile?.role === role,
+    [profile]
+  );
+
+  const hasPermission = useCallback(
+    (permission: string) => {
+      // Extend this logic as needed
+      return profile?.role === "admin"; // Example: only admin has all permissions
+    },
+    [profile]
+  );
+
+  // 🔹 Initialize authentication
   useEffect(() => {
     const initializeAuth = async () => {
       setIsLoading(true);
 
-      // 1. Attempt to get the session from Supabase's cache.
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
+      const {
+        data: { session: initialSession },
+      } = await supabase.auth.getSession();
 
-      // 2. Validate the session.
       if (initialSession?.user) {
         const userProfile = await fetchUserProfile(initialSession.user.id);
-
-        // 3. If a profile exists, the session is valid.
         if (userProfile) {
           setUser(initialSession.user);
           setProfile(userProfile);
           setSession(initialSession);
         } else {
-          // 4. If no profile, the session is stale or invalid. Force sign-out.
-          console.warn("Session found, but no matching profile. Forcing sign-out.");
           await signOut();
         }
       }
@@ -125,48 +196,37 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     initializeAuth();
 
-    /**
-     * FIX: The onAuthStateChange listener now acts as a real-time session guard.
-     */
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        setIsLoading(true);
-        console.log(`Auth event: ${event}`);
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      console.log(`Auth event: ${event}`);
+      setIsLoading(true);
 
-        if (event === "SIGNED_IN" && newSession?.user) {
-          const userProfile = await fetchUserProfile(newSession.user.id);
-          if (userProfile) {
-            setUser(newSession.user);
-            setProfile(userProfile);
-            setSession(newSession);
-          } else {
-            // This can happen during signup if the profile trigger is slow.
-            // Or if a user signs in but their profile was deleted.
-            console.warn("SIGNED_IN event, but no profile found. Waiting or signing out.");
-            // Optional: Add a small delay/retry here for new signups.
-            // For now, we treat it as invalid.
-            await signOut();
-          }
-        } else if (event === "SIGNED_OUT") {
+      if (event === "SIGNED_IN" && newSession?.user) {
+        const userProfile = await fetchUserProfile(newSession.user.id);
+        if (userProfile) {
+          setUser(newSession.user);
+          setProfile(userProfile);
+          setSession(newSession);
+        } else {
           await signOut();
-        } else if (event === "TOKEN_REFRESHED" && newSession?.user) {
-          // A token refresh is a good time to re-validate the session.
-          const userProfile = await fetchUserProfile(newSession.user.id);
-          if (!userProfile) {
-            console.warn("Token refreshed, but profile is gone. Forcing sign-out.");
-            await signOut();
-          } else {
-            // Session is still valid, update state.
-            setSession(newSession);
-            setUser(newSession.user);
-            setProfile(userProfile);
-          }
         }
-        setIsLoading(false);
+      } else if (event === "SIGNED_OUT") {
+        await signOut();
+      } else if (event === "TOKEN_REFRESHED" && newSession?.user) {
+        const userProfile = await fetchUserProfile(newSession.user.id);
+        if (userProfile) {
+          setUser(newSession.user);
+          setProfile(userProfile);
+          setSession(newSession);
+        } else {
+          await signOut();
+        }
       }
-    );
 
-    // Cleanup the subscription on component unmount.
+      setIsLoading(false);
+    });
+
     return () => {
       subscription.unsubscribe();
     };
@@ -179,8 +239,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isAuthenticated,
     isLoading,
     isInitialized,
+    signIn,
+    signUp,
     signOut,
-    // Include other methods like signIn, signUp if they are defined here
+    resetPassword,
+    updateProfile,
+    refreshSession,
+    hasRole,
+    hasPermission,
   };
 
   return (
@@ -188,12 +254,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   );
 };
 
-/**
- * Custom hook to use the AuthContext.
- */
+// Custom hook
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;

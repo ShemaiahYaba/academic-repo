@@ -1,21 +1,22 @@
 import type { User, Session } from "@supabase/supabase-js";
-// import type { Database } from './supabase';
-import { ReactNode } from "react";
 
-// Authentication Types
+// -------------------- //
+//      AUTH TYPES      //
+// -------------------- //
+
 export type UserRole = "admin" | "user" | "editor";
 
 export interface UserProfile {
-  username: any;
-  last_name: ReactNode;
-  first_name: ReactNode;
   id: string;
   email: string;
-  full_name: string | null;
-  avatar_url: string | null;
-  role: UserRole;
-  created_at: string;
-  updated_at: string;
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  full_name?: string | null;
+  avatar_url?: string | null;
+  role?: UserRole;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface AuthState {
@@ -27,7 +28,10 @@ export interface AuthState {
   isInitialized: boolean;
 }
 
-// UI State Types
+// -------------------- //
+//       UI TYPES       //
+// -------------------- //
+
 export type Theme = "light" | "dark" | "system";
 export type Language = "en" | "es" | "fr" | "de";
 
@@ -39,7 +43,10 @@ export interface UIState {
   loadingText: string | null;
 }
 
-// Error Types
+// -------------------- //
+//      ERROR TYPES     //
+// -------------------- //
+
 export type ErrorSeverity = "low" | "medium" | "high" | "critical";
 export type ErrorCategory =
   | "authentication"
@@ -51,20 +58,23 @@ export type ErrorCategory =
   | "unknown";
 
 export interface AppError {
-  id: string;
+  id?: string;
   message: string;
   title?: string;
   severity: ErrorSeverity;
   category: ErrorCategory;
-  timestamp: Date;
-  retryable: boolean;
-  retryCount: number;
-  maxRetries: number;
+  timestamp?: Date;
+  retryable?: boolean;
+  retryCount?: number;
+  maxRetries?: number;
   context?: Record<string, any>;
   originalError?: Error;
 }
 
-// Notification Types
+// -------------------- //
+//   NOTIFICATION TYPES //
+// -------------------- //
+
 export type NotificationType = "success" | "error" | "warning" | "info";
 export type NotificationPosition =
   | "top-right"
@@ -73,6 +83,12 @@ export type NotificationPosition =
   | "bottom-left"
   | "top-center"
   | "bottom-center";
+
+export interface NotificationAction {
+  label: string;
+  action: () => void;
+  variant?: "primary" | "secondary" | "danger";
+}
 
 export interface Notification {
   id: string;
@@ -86,20 +102,9 @@ export interface Notification {
   timestamp: Date;
 }
 
-export interface NotificationAction {
-  label: string;
-  action: () => void;
-  variant?: "primary" | "secondary" | "danger";
-}
-
-// Data State Types
-export interface DataState<T = any> {
-  data: T | null;
-  isLoading: boolean;
-  error: AppError | null;
-  lastUpdated: Date | null;
-  isStale: boolean;
-}
+// -------------------- //
+//     DATA CACHE       //
+// -------------------- //
 
 export interface CacheEntry<T = any> {
   data: T;
@@ -111,7 +116,18 @@ export interface DataCache {
   [key: string]: CacheEntry;
 }
 
-// Real-time Subscription Types
+export interface DataState<T = any> {
+  data: T | null;
+  isLoading: boolean;
+  error: AppError | null;
+  lastUpdated: Date | null;
+  isStale: boolean;
+}
+
+// -------------------- //
+//  REAL-TIME SUBS      //
+// -------------------- //
+
 export interface RealtimeSubscription {
   id: string;
   table: string;
@@ -121,7 +137,10 @@ export interface RealtimeSubscription {
   isActive: boolean;
 }
 
-// Global State Types
+// -------------------- //
+//    GLOBAL STATE      //
+// -------------------- //
+
 export interface GlobalState {
   auth: AuthState;
   ui: UIState;
@@ -131,7 +150,10 @@ export interface GlobalState {
   subscriptions: RealtimeSubscription[];
 }
 
-// Context Types
+// -------------------- //
+//    CONTEXT TYPES     //
+// -------------------- //
+
 export interface AuthContextType {
   user: User | null;
   profile: UserProfile | null;
@@ -140,39 +162,36 @@ export interface AuthContextType {
   isLoading: boolean;
   isInitialized: boolean;
 
-  signUp: (
+  signIn: (
     email: string,
     password: string
-  ) => Promise<{ user: User; error: AppError | null }>;
+  ) => Promise<{ user: User | null; error: AppError | null }>;
 
-  signIn: (
+  signUp: (
     email: string,
     password: string
   ) => Promise<{ user: User | null; error: AppError | null }>;
 
   signOut: () => Promise<void>;
 
-  resetPassword: (email: string) => Promise<{ error: AppError | null }>;
+  resetPassword?: (email: string) => Promise<{ error: AppError | null }>;
 
-  updateProfile: (
+  updateProfile?: (
     updates: Partial<UserProfile>
-  ) => Promise<{ profile: UserProfile; error: AppError | null }>;
+  ) => Promise<{ profile: UserProfile | null; error: AppError | null }>;
 
-  refreshSession: () => Promise<void>;
-
-  hasRole: (role: UserRole) => boolean;
-  hasPermission: (permission: string) => boolean;
+  refreshSession?: () => Promise<void>;
+  hasRole?: (role: UserRole) => boolean;
+  hasPermission?: (permission: string) => boolean;
 }
 
 export interface UIContextType {
-  // State
   theme: Theme;
   language: Language;
   sidebarOpen: boolean;
   isLoading: boolean;
   loadingText: string | null;
 
-  // Actions
   setTheme: (theme: Theme) => void;
   setLanguage: (language: Language) => void;
   toggleSidebar: () => void;
@@ -180,34 +199,24 @@ export interface UIContextType {
 }
 
 export interface ErrorContextType {
-  // State
   errors: AppError[];
-
-  // Actions
   addError: (
     error: Omit<AppError, "id" | "timestamp" | "retryCount">
   ) => string;
   removeError: (id: string) => void;
   clearErrors: () => void;
   retryError: (id: string) => void;
-
-  // Utilities
   getErrorsByCategory: (category: ErrorCategory) => AppError[];
   getErrorsBySeverity: (severity: ErrorSeverity) => AppError[];
 }
 
 export interface NotificationContextType {
-  // State
   notifications: Notification[];
-
-  // Actions
   addNotification: (
     notification: Omit<Notification, "id" | "timestamp">
   ) => string;
   removeNotification: (id: string) => void;
   clearNotifications: () => void;
-
-  // Convenience methods
   success: (
     title: string,
     message: string,
@@ -231,16 +240,13 @@ export interface NotificationContextType {
 }
 
 export interface DataContextType {
-  // State
   cache: DataCache;
   subscriptions: RealtimeSubscription[];
 
-  // Actions
   getCachedData: <T>(key: string) => T | null;
   setCachedData: <T>(key: string, data: T, ttl?: number) => void;
   clearCache: (key?: string) => void;
 
-  // Real-time subscriptions
   subscribe: (
     table: string,
     event: RealtimeSubscription["event"],
@@ -250,7 +256,6 @@ export interface DataContextType {
   unsubscribe: (id: string) => void;
   unsubscribeAll: () => void;
 
-  // Utilities
   isDataStale: (key: string, maxAge?: number) => boolean;
   getCacheStats: () => { size: number; keys: string[] };
 }

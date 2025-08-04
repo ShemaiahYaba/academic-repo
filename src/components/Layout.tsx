@@ -4,14 +4,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import LogoutButton from "@/components/LogoutButton";
-import { AuthNavigation } from "@/components/AuthNavigation";
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth(); // Access isAuthenticated directly from context
 
   return (
     <div className="min-h-screen flex flex-col">
-      <AuthNavigation />
+      {/* <AuthNavigation /> */}
       <div className="flex flex-1">
         <div className="flex flex-col flex-1">
           <Navbar />

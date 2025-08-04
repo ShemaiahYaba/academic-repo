@@ -10,6 +10,7 @@ import type {
   AppError,
 } from "@/types/global";
 import { parseSupabaseError, logError } from "@/utils/errorHandler";
+import { clearAuthSessionOnReload } from "@/utils/session";
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -51,6 +52,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
    * Initialize authentication state
    */
   useEffect(() => {
+    // Clear auth session on page reload
+    clearAuthSessionOnReload("sb-auth-token");
+
     const initializeAuth = async () => {
       try {
         const {

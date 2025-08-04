@@ -1,9 +1,9 @@
-import type { User, Session } from '@supabase/supabase-js';
+import type { User, Session } from "@supabase/supabase-js";
 // import type { Database } from './supabase';
-import { ReactNode } from 'react';
+import { ReactNode } from "react";
 
 // Authentication Types
-export type UserRole = 'admin' | 'user' | 'editor';
+export type UserRole = "admin" | "user" | "editor";
 
 export interface UserProfile {
   username: any;
@@ -28,8 +28,8 @@ export interface AuthState {
 }
 
 // UI State Types
-export type Theme = 'light' | 'dark' | 'system';
-export type Language = 'en' | 'es' | 'fr' | 'de';
+export type Theme = "light" | "dark" | "system";
+export type Language = "en" | "es" | "fr" | "de";
 
 export interface UIState {
   theme: Theme;
@@ -40,15 +40,15 @@ export interface UIState {
 }
 
 // Error Types
-export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';
-export type ErrorCategory = 
-  | 'authentication'
-  | 'network'
-  | 'validation'
-  | 'permission'
-  | 'supabase'
-  | 'domain'
-  | 'unknown';
+export type ErrorSeverity = "low" | "medium" | "high" | "critical";
+export type ErrorCategory =
+  | "authentication"
+  | "network"
+  | "validation"
+  | "permission"
+  | "supabase"
+  | "domain"
+  | "unknown";
 
 export interface AppError {
   id: string;
@@ -65,14 +65,14 @@ export interface AppError {
 }
 
 // Notification Types
-export type NotificationType = 'success' | 'error' | 'warning' | 'info';
-export type NotificationPosition = 
-  | 'top-right'
-  | 'top-left'
-  | 'bottom-right'
-  | 'bottom-left'
-  | 'top-center'
-  | 'bottom-center';
+export type NotificationType = "success" | "error" | "warning" | "info";
+export type NotificationPosition =
+  | "top-right"
+  | "top-left"
+  | "bottom-right"
+  | "bottom-left"
+  | "top-center"
+  | "bottom-center";
 
 export interface Notification {
   id: string;
@@ -89,7 +89,7 @@ export interface Notification {
 export interface NotificationAction {
   label: string;
   action: () => void;
-  variant?: 'primary' | 'secondary' | 'danger';
+  variant?: "primary" | "secondary" | "danger";
 }
 
 // Data State Types
@@ -115,7 +115,7 @@ export interface DataCache {
 export interface RealtimeSubscription {
   id: string;
   table: string;
-  event: 'INSERT' | 'UPDATE' | 'DELETE' | '*';
+  event: "INSERT" | "UPDATE" | "DELETE" | "*";
   filter?: string;
   callback: (payload: any) => void;
   isActive: boolean;
@@ -133,23 +133,33 @@ export interface GlobalState {
 
 // Context Types
 export interface AuthContextType {
-  // State
   user: User | null;
   profile: UserProfile | null;
   session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   isInitialized: boolean;
-  
-  // Actions
-  signUp: (email: string, password: string, profile?: Partial<UserProfile>) => Promise<{ user: User; error: AppError | null }>;
-  signIn: (email: string, password: string) => Promise<{ user: User; error: AppError | null }>;
+
+  signUp: (
+    email: string,
+    password: string
+  ) => Promise<{ user: User; error: AppError | null }>;
+
+  signIn: (
+    email: string,
+    password: string
+  ) => Promise<{ user: User | null; error: AppError | null }>;
+
   signOut: () => Promise<{ error: AppError | null }>;
+
   resetPassword: (email: string) => Promise<{ error: AppError | null }>;
-  updateProfile: (updates: Partial<UserProfile>) => Promise<{ profile: UserProfile; error: AppError | null }>;
+
+  updateProfile: (
+    updates: Partial<UserProfile>
+  ) => Promise<{ profile: UserProfile; error: AppError | null }>;
+
   refreshSession: () => Promise<void>;
-  
-  // Utilities
+
   hasRole: (role: UserRole) => boolean;
   hasPermission: (permission: string) => boolean;
 }
@@ -161,7 +171,7 @@ export interface UIContextType {
   sidebarOpen: boolean;
   isLoading: boolean;
   loadingText: string | null;
-  
+
   // Actions
   setTheme: (theme: Theme) => void;
   setLanguage: (language: Language) => void;
@@ -172,13 +182,15 @@ export interface UIContextType {
 export interface ErrorContextType {
   // State
   errors: AppError[];
-  
+
   // Actions
-  addError: (error: Omit<AppError, 'id' | 'timestamp' | 'retryCount'>) => string;
+  addError: (
+    error: Omit<AppError, "id" | "timestamp" | "retryCount">
+  ) => string;
   removeError: (id: string) => void;
   clearErrors: () => void;
   retryError: (id: string) => void;
-  
+
   // Utilities
   getErrorsByCategory: (category: ErrorCategory) => AppError[];
   getErrorsBySeverity: (severity: ErrorSeverity) => AppError[];
@@ -187,35 +199,58 @@ export interface ErrorContextType {
 export interface NotificationContextType {
   // State
   notifications: Notification[];
-  
+
   // Actions
-  addNotification: (notification: Omit<Notification, 'id' | 'timestamp'>) => string;
+  addNotification: (
+    notification: Omit<Notification, "id" | "timestamp">
+  ) => string;
   removeNotification: (id: string) => void;
   clearNotifications: () => void;
-  
+
   // Convenience methods
-  success: (title: string, message: string, options?: Partial<Notification>) => string;
-  error: (title: string, message: string, options?: Partial<Notification>) => string;
-  warning: (title: string, message: string, options?: Partial<Notification>) => string;
-  info: (title: string, message: string, options?: Partial<Notification>) => string;
+  success: (
+    title: string,
+    message: string,
+    options?: Partial<Notification>
+  ) => string;
+  error: (
+    title: string,
+    message: string,
+    options?: Partial<Notification>
+  ) => string;
+  warning: (
+    title: string,
+    message: string,
+    options?: Partial<Notification>
+  ) => string;
+  info: (
+    title: string,
+    message: string,
+    options?: Partial<Notification>
+  ) => string;
 }
 
 export interface DataContextType {
   // State
   cache: DataCache;
   subscriptions: RealtimeSubscription[];
-  
+
   // Actions
   getCachedData: <T>(key: string) => T | null;
   setCachedData: <T>(key: string, data: T, ttl?: number) => void;
   clearCache: (key?: string) => void;
-  
+
   // Real-time subscriptions
-  subscribe: (table: string, event: RealtimeSubscription['event'], callback: (payload: any) => void, filter?: string) => string;
+  subscribe: (
+    table: string,
+    event: RealtimeSubscription["event"],
+    callback: (payload: any) => void,
+    filter?: string
+  ) => string;
   unsubscribe: (id: string) => void;
   unsubscribeAll: () => void;
-  
+
   // Utilities
   isDataStale: (key: string, maxAge?: number) => boolean;
   getCacheStats: () => { size: number; keys: string[] };
-} 
+}

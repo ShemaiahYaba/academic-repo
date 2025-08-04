@@ -27,65 +27,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   /**
    * Fetch user profile from database
    */
-  const fetchUserProfile = useCallback(
-    async (userId: string): Promise<UserProfile | null> => {
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", userId)
-          .single();
+  const fetchUserProfile = useCallback(async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
 
-        if (error) {
-          logError(parseSupabaseError(error));
-          return null;
-        }
-
-        return data;
-      } catch (err) {
-        logError(parseSupabaseError(err as Error));
+      if (error) {
+        logError(parseSupabaseError(error));
         return null;
       }
-    },
-    []
-  );
 
-  /**
-   * Create user profile in database
-   */
-  const createUserProfile = useCallback(
-    async (
-      userId: string,
-      email: string,
-      profileData?: Partial<UserProfile>
-    ): Promise<UserProfile | null> => {
-      try {
-        const newProfile: Partial<UserProfile> = {
-          id: userId,
-          email,
-          role: "user",
-          ...profileData,
-        };
-
-        const { data, error } = await supabase
-          .from("profiles")
-          .insert([newProfile])
-          .select()
-          .single();
-
-        if (error) {
-          logError(parseSupabaseError(error));
-          return null;
-        }
-
-        return data;
-      } catch (err) {
-        logError(parseSupabaseError(err as Error));
-        return null;
-      }
-    },
-    []
-  );
+      return data;
+    } catch (err) {
+      logError(parseSupabaseError(err as Error));
+      return null;
+    }
+  }, []);
 
   /**
    * Initialize authentication state
@@ -121,13 +81,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(session.user);
         setSession(session);
 
-        let userProfile = await fetchUserProfile(session.user.id);
-        if (!userProfile) {
-          userProfile = await createUserProfile(
-            session.user.id,
-            session.user.email!
-          );
-        }
+        // Just fetch profile (trigger handles creation)
+        const userProfile = await fetchUserProfile(session.user.id);
         setProfile(userProfile);
       } else {
         setUser(null);
@@ -139,16 +94,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchUserProfile, createUserProfile]);
+  }, [fetchUserProfile]);
 
   /**
-   * Sign up
+   * Sign up (relies on Supabase trigger for profile creation)
    */
   const signUp = useCallback(
     async (
       email: string,
-      password: string,
-      profileData?: Partial<UserProfile>
+      password: string
     ): Promise<{ user: User; error: AppError | null }> => {
       try {
         setIsLoading(true);
@@ -160,28 +114,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             ? parseSupabaseError(error)
             : parseSupabaseError(new Error("User creation failed"));
           logError(appError);
-          // Throw to ensure user is never null
           throw appError;
         }
 
-        const userProfile = await createUserProfile(
-          data.user.id,
-          email,
-          profileData
-        );
+        // Allow small delay for trigger to insert profile
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        const userProfile = await fetchUserProfile(data.user.id);
         setProfile(userProfile);
+
         return { user: data.user, error: null };
       } catch (err) {
         const appError = parseSupabaseError(err as Error);
         logError(appError);
-        // Throwing here would break the contract, so return a dummy user or rethrow
-        // But to match the type, we must throw
         throw appError;
       } finally {
         setIsLoading(false);
       }
     },
-    [createUserProfile]
+    [fetchUserProfile]
   );
 
   /**
@@ -191,29 +142,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     async (
       email: string,
       password: string
-    ): Promise<{ user: User; error: AppError | null }> => {
+    ): Promise<{ user: User | null; error: AppError | null }> => {
       try {
         setIsLoading(true);
-
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
-        if (error || !data.user) {
-          const appError = error
-            ? parseSupabaseError(error)
-            : parseSupabaseError(new Error("Sign in failed"));
+        if (error) {
+          const appError = parseSupabaseError(error);
           logError(appError);
-          throw appError;
+          return { user: null, error: appError };
         }
 
-        setProfile(await fetchUserProfile(data.user.id));
+        if (data.user) {
+          setUser(data.user);
+          setSession(data.session);
+          const userProfile = await fetchUserProfile(data.user.id);
+          setProfile(userProfile);
+        }
+
         return { user: data.user, error: null };
       } catch (err) {
         const appError = parseSupabaseError(err as Error);
         logError(appError);
-        throw appError;
+        return { user: null, error: appError };
       } finally {
         setIsLoading(false);
       }

@@ -9,7 +9,7 @@ import {
 } from "react";
 import type { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
-import type { AuthContextType, UserProfile, AppError } from "@/types/global";
+import type { AuthContextType, UserProfile } from "@/types/global";
 import { parseSupabaseError, logError } from "@/utils/errorHandler";
 import { useNavigate } from "react-router-dom";
 

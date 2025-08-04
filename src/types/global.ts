@@ -150,7 +150,7 @@ export interface AuthContextType {
     password: string
   ) => Promise<{ user: User | null; error: AppError | null }>;
 
-  signOut: () => Promise<{ error: AppError | null }>;
+  signOut: () => Promise<void>;
 
   resetPassword: (email: string) => Promise<{ error: AppError | null }>;
 

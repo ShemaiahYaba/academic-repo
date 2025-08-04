@@ -313,7 +313,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Define permission mappings
     const permissions: Record<UserRole, string[]> = {
       admin: ['*'], // Admin has all permissions
-      moderator: ['read', 'write', 'moderate', 'delete_own'],
+      editor: ['read', 'write', 'moderate', 'delete_own', 'upload_journal'],
       user: ['read', 'write_own', 'delete_own'],
     };
 

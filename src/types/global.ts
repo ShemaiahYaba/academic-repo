@@ -3,7 +3,7 @@ import type { User, Session } from '@supabase/supabase-js';
 import { ReactNode } from 'react';
 
 // Authentication Types
-export type UserRole = 'admin' | 'user' | 'moderator';
+export type UserRole = 'admin' | 'user' | 'editor';
 
 export interface UserProfile {
   username: any;

@@ -15,7 +15,7 @@ The authentication workflow has been completely refactored to provide a producti
 - **Logout**: Secure session termination
 
 ### ✅ Role-Based Access Control (RBAC)
-- **User Roles**: `user`, `moderator`, `admin`
+- **User Roles**: `user`, `editor`, `admin`
 - **Permission System**: Granular permissions for different actions
 - **Route Protection**: Automatic route-level authorization
 - **Component-Level Protection**: Conditional rendering based on permissions
@@ -116,7 +116,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 </ProtectedRoute>
 
 // Role-based protection
-<ProtectedRoute requiredRole="admin">
+<ProtectedRoute requiredRole="editor">
   <AdminPanel />
 </ProtectedRoute>
 
@@ -204,7 +204,7 @@ The authentication system manages several key states:
 
 ### User Roles
 - **`user`**: Basic authenticated user
-- **`moderator`**: Can moderate content
+- **`editor`**: Can moderate content and upload journals
 - **`admin`**: Full administrative access
 
 ### Permission System
@@ -218,7 +218,7 @@ const canDeleteArticles = hasPermission('delete:articles');
 // Permission mapping (defined in AuthProvider)
 const permissionMap = {
   'user': ['read:articles', 'write:articles'],
-  'moderator': ['read:articles', 'write:articles', 'delete:articles'],
+  'editor': ['read:articles', 'write:articles', 'delete:articles', 'upload:journals'],
   'admin': ['read:articles', 'write:articles', 'delete:articles', 'manage:users']
 };
 ```
@@ -325,7 +325,7 @@ Navigate to `/auth-example` to see the complete authentication workflow in actio
 4. Sign in with your credentials
 
 ### 3. Test Role-Based Access
-1. Create users with different roles (user, moderator, admin)
+1. Create users with different roles (user, editor, admin)
 2. Test the role and permission checks
 3. Verify that protected routes work correctly
 

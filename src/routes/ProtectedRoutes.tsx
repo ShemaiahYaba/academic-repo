@@ -122,7 +122,7 @@ const ProtectedRoutes = () => (
       <Route
         path="/upload-journal"
         element={
-          <ProtectedRoute requiredRole="admin">
+          <ProtectedRoute requiredRole="editor">
             <Layout>
               <UploadJournal />
             </Layout>

@@ -24,6 +24,9 @@ const getPositionClasses = (position: NotificationPosition) => {
 export const NotificationContainer = () => {
   const { notifications, removeNotification } = useNotification();
 
+  // Debug: Log notifications
+  console.log('Current notifications:', notifications);
+
   // Group notifications by position
   const notificationsByPosition = notifications.reduce((acc, notification) => {
     const position = notification.position || 'top-left';
@@ -39,7 +42,7 @@ export const NotificationContainer = () => {
       {Object.entries(notificationsByPosition).map(([position, positionNotifications]) => (
         <div
           key={position}
-          className={`fixed z-[9999] p-4 space-y-4 ${getPositionClasses(position as NotificationPosition)}`}
+          className={`fixed z-[9999] p-4 space-y-4 pointer-events-none ${getPositionClasses(position as NotificationPosition)}`}
         >
           {positionNotifications.map((notification) => (
             <NotificationToast

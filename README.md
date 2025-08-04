@@ -6,7 +6,7 @@ A production-grade Vite-based academic repository application with a comprehensi
 
 ### 🔐 Authentication & Authorization
 - **Session Management**: Automatic session persistence and refresh
-- **Role-Based Access Control**: Admin, moderator, and user roles with granular permissions
+- **Role-Based Access Control**: Admin, editor, and user roles with granular permissions
 - **Profile Management**: User profile creation and updates
 - **Protected Routes**: Route-level authentication and authorization guards
 
@@ -156,7 +156,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/admin" element={
-        <ProtectedRoute requiredRole="admin">
+        <ProtectedRoute requiredRole="editor">
           <AdminPanel />
         </ProtectedRoute>
       } />

@@ -23,7 +23,7 @@ const getIcon = (type: NotificationType) => {
 };
 
 const getStyles = (type: NotificationType) => {
-  const baseStyles = "flex w-full max-w-sm bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden";
+  const baseStyles = "flex w-full max-w-sm bg-white dark:bg-gray-800 shadow-lg rounded-lg ring-1 ring-black ring-opacity-5 overflow-hidden";
   
   switch (type) {
     case 'success':
@@ -58,6 +58,19 @@ export const NotificationToast = ({ notification, onRemove }: NotificationToastP
   const [isVisible, setIsVisible] = useState(false);
   const [progress, setProgress] = useState(100);
 
+  // Determine animation direction based on position
+  const getAnimationClasses = () => {
+    const position = notification.position || 'top-left';
+    if (position.includes('left')) {
+      return isVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0';
+    } else if (position.includes('right')) {
+      return isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0';
+    } else {
+      // For center positions, use fade animation
+      return isVisible ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0';
+    }
+  };
+
   useEffect(() => {
     // Animate in
     const timer = setTimeout(() => setIsVisible(true), 100);
@@ -90,9 +103,7 @@ export const NotificationToast = ({ notification, onRemove }: NotificationToastP
 
   return (
     <div
-      className={`transform transition-all duration-300 ease-in-out ${
-        isVisible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
-      }`}
+      className={`transform transition-all duration-300 ease-in-out pointer-events-auto ${getAnimationClasses()}`}
     >
       <div className={getStyles(notification.type)}>
         <div className="flex-1 w-0 p-4">

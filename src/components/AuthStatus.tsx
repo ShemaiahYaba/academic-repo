@@ -124,7 +124,7 @@ export const AuthStatus: React.FC = () => {
                     <span className={`px-2 py-1 text-xs rounded-full ${
                       profile.role === 'admin' 
                         ? 'bg-red-100 text-red-700' 
-                        : profile.role === 'moderator'
+                        : profile.role === 'editor'
                         ? 'bg-orange-100 text-orange-700'
                         : 'bg-blue-100 text-blue-700'
                     }`}>

@@ -10,7 +10,6 @@ import type {
   AppError,
 } from "@/types/global";
 import { parseSupabaseError, logError } from "@/utils/errorHandler";
-import { clearAuthSessionOnReload } from "@/utils/session";
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -26,7 +25,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const isAuthenticated = !!user;
 
   /**
-   * Fetch user profile from database
+   * Clears all local session data from the browser.
+   * This is a comprehensive cleanup to prevent stale sessions.
+   */
+  const clearBrowserCache = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    indexedDB.deleteDatabase("supabase-auth-modal"); // Corrected DB name
+    console.log("Browser cache cleared.");
+  };
+
+  /**
+   * Fetch user profile from the database.
+   * This is a critical step to validate the session.
    */
   const fetchUserProfile = useCallback(async (userId: string) => {
     try {
@@ -40,7 +51,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         logError(parseSupabaseError(error));
         return null;
       }
-
       return data;
     } catch (err) {
       logError(parseSupabaseError(err as Error));
@@ -49,25 +59,68 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   /**
-   * Initialize authentication state
+   * Sign out the user and clear all session data.
+   * This function is now the single source of truth for logging out.
+   */
+  const signOut = useCallback(async (): Promise<{ error: AppError | null }> => {
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        const appError = parseSupabaseError(error);
+        logError(appError);
+        return { error: appError };
+      }
+
+      // Clear all application state
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+
+      // FIX: Clear all browser storage to prevent stale sessions.
+      clearBrowserCache();
+
+      return { error: null };
+    } catch (err) {
+      const appError = parseSupabaseError(err as Error);
+      logError(appError);
+      return { error: appError };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  /**
+   * Initialize and validate the authentication state on app load.
    */
   useEffect(() => {
-    // Clear auth session on page reload
-    clearAuthSessionOnReload("sb-auth-token");
-
     const initializeAuth = async () => {
       try {
+        // Attempt to get the session from Supabase's cache
         const {
           data: { session: initialSession },
         } = await supabase.auth.getSession();
 
         if (initialSession?.user) {
-          setUser(initialSession.user);
-          setSession(initialSession);
-          setProfile(await fetchUserProfile(initialSession.user.id));
+          // FIX: Validate the session by fetching the user's profile.
+          const userProfile = await fetchUserProfile(initialSession.user.id);
+
+          if (userProfile) {
+            // If the profile exists, the session is valid.
+            setUser(initialSession.user);
+            setSession(initialSession);
+            setProfile(userProfile);
+          } else {
+            // If no profile is found, the session is stale. Sign out.
+            console.warn("No profile found for the current session. Signing out.");
+            await signOut();
+          }
         }
       } catch (err) {
         logError(parseSupabaseError(err as Error));
+        // If there's an error, ensure the user is signed out.
+        await signOut();
       } finally {
         setIsInitialized(true);
         setIsLoading(false);
@@ -81,25 +134,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.id);
 
-      if (session?.user) {
-        setUser(session.user);
-        setSession(session);
-
-        // Just fetch profile (trigger handles creation)
+      if (event === "SIGNED_IN" && session?.user) {
+        // FIX: On sign-in, validate the session before setting the user state.
         const userProfile = await fetchUserProfile(session.user.id);
-        setProfile(userProfile);
-      } else {
+        if (userProfile) {
+          setUser(session.user);
+          setSession(session);
+          setProfile(userProfile);
+        } else {
+          console.warn("Profile not found after sign-in. Signing out.");
+          await signOut();
+        }
+      } else if (event === "SIGNED_OUT") {
+        // On sign-out, clear all state and cache.
         setUser(null);
         setProfile(null);
         setSession(null);
+        clearBrowserCache();
       }
 
       setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchUserProfile]);
+  }, [fetchUserProfile, signOut]);
 
+  // ... (the rest of the provider remains the same)
   /**
    * Sign up (relies on Supabase trigger for profile creation)
    */
@@ -181,33 +241,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     },
     [fetchUserProfile]
   );
-
-  /**
-   * Sign out
-   */
-  const signOut = useCallback(async (): Promise<{ error: AppError | null }> => {
-    try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signOut();
-
-      if (error) {
-        const appError = parseSupabaseError(error);
-        logError(appError);
-        return { error: appError };
-      }
-
-      setUser(null);
-      setProfile(null);
-      setSession(null);
-      return { error: null };
-    } catch (err) {
-      const appError = parseSupabaseError(err as Error);
-      logError(appError);
-      return { error: appError };
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
   /**
    * Reset password

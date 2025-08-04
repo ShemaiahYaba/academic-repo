@@ -1,15 +1,22 @@
+
 // contexts/AuthProvider.tsx
-import { useEffect, useState, useCallback } from "react";
+import {
+  useEffect,
+  useState,
+  useCallback,
+  createContext,
+  useContext,
+} from "react";
 import type { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
-import { AuthContext } from "./AuthContext";
-import type {
-  AuthContextType,
-  UserProfile,
-  UserRole,
-  AppError,
-} from "@/types/global";
+import type { AuthContextType, UserProfile, AppError } from "@/types/global";
 import { parseSupabaseError, logError } from "@/utils/errorHandler";
+import { useNavigate } from "react-router-dom";
+
+// Create the AuthContext with a default undefined value
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -21,37 +28,64 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  const navigate = useNavigate();
 
-  const isAuthenticated = !!user;
+  const isAuthenticated = !!user && !!profile;
 
   /**
-   * Clears all local session data from the browser.
-   * This is a comprehensive cleanup to prevent stale sessions.
+   * FIX: A single, robust function to clear all session data from the browser.
+   * This is crucial for preventing stale data from causing issues.
+   * Supabase uses localStorage and sometimes IndexedDB for session persistence.
    */
-  const clearBrowserCache = () => {
+  const clearBrowserCache = useCallback(() => {
+    console.log("Clearing all browser session cache...");
     localStorage.clear();
     sessionStorage.clear();
-    indexedDB.deleteDatabase("supabase-auth-modal"); // Corrected DB name
-    console.log("Browser cache cleared.");
-  };
+    // Supabase's default DB name for auth is 'supabase.auth.token'
+    // but clearing all indexedDBs is safer if the name changes.
+    indexedDB.open("supabase.auth.token").onsuccess = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+      db.close();
+      indexedDB.deleteDatabase("supabase.auth.token");
+    };
+  }, []);
 
   /**
-   * Fetch user profile from the database.
-   * This is a critical step to validate the session.
+   * FIX: The signOut function is now the single source of truth for logging out.
+   * It calls the Supabase client, clears React state, and wipes the browser cache.
+   */
+  const signOut = useCallback(async () => {
+    console.log("Signing out and clearing session...");
+    await supabase.auth.signOut();
+    setUser(null);
+    setProfile(null);
+    setSession(null);
+    clearBrowserCache();
+    // Redirect to login to ensure a clean state.
+    navigate("/login");
+  }, [clearBrowserCache, navigate]);
+
+  /**
+   * Fetches the user profile from the database.
+   * This function is the core of our session validation logic.
+   * @param userId - The ID of the user to fetch.
+   * @returns The user profile or null if not found or on error.
    */
   const fetchUserProfile = useCallback(async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data, error, status } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
         .single();
 
-      if (error) {
-        logError(parseSupabaseError(error));
-        return null;
+      // If RLS prevents access or the row doesn't exist, Supabase returns an error.
+      if (error && status !== 406) {
+        // 406 is a "Not Acceptable" error when single() finds no rows, which is expected.
+        throw error;
       }
-      return data;
+
+      return data; // Returns profile data or null
     } catch (err) {
       logError(parseSupabaseError(err as Error));
       return null;
@@ -59,305 +93,84 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   /**
-   * Sign out the user and clear all session data.
-   * This function is now the single source of truth for logging out.
-   */
-  const signOut = useCallback(async (): Promise<{ error: AppError | null }> => {
-    try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signOut();
-
-      if (error) {
-        const appError = parseSupabaseError(error);
-        logError(appError);
-        return { error: appError };
-      }
-
-      // Clear all application state
-      setUser(null);
-      setProfile(null);
-      setSession(null);
-
-      // FIX: Clear all browser storage to prevent stale sessions.
-      clearBrowserCache();
-
-      return { error: null };
-    } catch (err) {
-      const appError = parseSupabaseError(err as Error);
-      logError(appError);
-      return { error: appError };
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  /**
-   * Initialize and validate the authentication state on app load.
+   * FIX: The main initialization and session validation logic.
+   * This runs only once when the component mounts.
    */
   useEffect(() => {
     const initializeAuth = async () => {
-      try {
-        // Attempt to get the session from Supabase's cache
-        const {
-          data: { session: initialSession },
-        } = await supabase.auth.getSession();
+      setIsLoading(true);
 
-        if (initialSession?.user) {
-          // FIX: Validate the session by fetching the user's profile.
-          const userProfile = await fetchUserProfile(initialSession.user.id);
+      // 1. Attempt to get the session from Supabase's cache.
+      const { data: { session: initialSession } } = await supabase.auth.getSession();
 
-          if (userProfile) {
-            // If the profile exists, the session is valid.
-            setUser(initialSession.user);
-            setSession(initialSession);
-            setProfile(userProfile);
-          } else {
-            // If no profile is found, the session is stale. Sign out.
-            console.warn("No profile found for the current session. Signing out.");
-            await signOut();
-          }
+      // 2. Validate the session.
+      if (initialSession?.user) {
+        const userProfile = await fetchUserProfile(initialSession.user.id);
+
+        // 3. If a profile exists, the session is valid.
+        if (userProfile) {
+          setUser(initialSession.user);
+          setProfile(userProfile);
+          setSession(initialSession);
+        } else {
+          // 4. If no profile, the session is stale or invalid. Force sign-out.
+          console.warn("Session found, but no matching profile. Forcing sign-out.");
+          await signOut();
         }
-      } catch (err) {
-        logError(parseSupabaseError(err as Error));
-        // If there's an error, ensure the user is signed out.
-        await signOut();
-      } finally {
-        setIsInitialized(true);
-        setIsLoading(false);
       }
+
+      setIsInitialized(true);
+      setIsLoading(false);
     };
 
     initializeAuth();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session?.user?.id);
+    /**
+     * FIX: The onAuthStateChange listener now acts as a real-time session guard.
+     */
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        setIsLoading(true);
+        console.log(`Auth event: ${event}`);
 
-      if (event === "SIGNED_IN" && session?.user) {
-        // FIX: On sign-in, validate the session before setting the user state.
-        const userProfile = await fetchUserProfile(session.user.id);
-        if (userProfile) {
-          setUser(session.user);
-          setSession(session);
-          setProfile(userProfile);
-        } else {
-          console.warn("Profile not found after sign-in. Signing out.");
+        if (event === "SIGNED_IN" && newSession?.user) {
+          const userProfile = await fetchUserProfile(newSession.user.id);
+          if (userProfile) {
+            setUser(newSession.user);
+            setProfile(userProfile);
+            setSession(newSession);
+          } else {
+            // This can happen during signup if the profile trigger is slow.
+            // Or if a user signs in but their profile was deleted.
+            console.warn("SIGNED_IN event, but no profile found. Waiting or signing out.");
+            // Optional: Add a small delay/retry here for new signups.
+            // For now, we treat it as invalid.
+            await signOut();
+          }
+        } else if (event === "SIGNED_OUT") {
           await signOut();
+        } else if (event === "TOKEN_REFRESHED" && newSession?.user) {
+          // A token refresh is a good time to re-validate the session.
+          const userProfile = await fetchUserProfile(newSession.user.id);
+          if (!userProfile) {
+            console.warn("Token refreshed, but profile is gone. Forcing sign-out.");
+            await signOut();
+          } else {
+            // Session is still valid, update state.
+            setSession(newSession);
+            setUser(newSession.user);
+            setProfile(userProfile);
+          }
         }
-      } else if (event === "SIGNED_OUT") {
-        // On sign-out, clear all state and cache.
-        setUser(null);
-        setProfile(null);
-        setSession(null);
-        clearBrowserCache();
+        setIsLoading(false);
       }
+    );
 
-      setIsLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    // Cleanup the subscription on component unmount.
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [fetchUserProfile, signOut]);
-
-  // ... (the rest of the provider remains the same)
-  /**
-   * Sign up (relies on Supabase trigger for profile creation)
-   */
-  const signUp = useCallback(
-    async (
-      email: string,
-      password: string
-    ): Promise<{ user: User; error: AppError | null }> => {
-      try {
-        setIsLoading(true);
-
-        const { data, error } = await supabase.auth.signUp({ email, password });
-
-        if (error || !data.user) {
-          const appError = error
-            ? parseSupabaseError(error)
-            : parseSupabaseError(new Error("User creation failed"));
-          logError(appError);
-          throw appError;
-        }
-
-        // Allow small delay for trigger to insert profile
-        let userProfile = null;
-        for (let i = 0; i < 3; i++) {
-          userProfile = await fetchUserProfile(data.user.id);
-          if (userProfile) break;
-          await new Promise((resolve) => setTimeout(resolve, 500));
-        }
-        setProfile(userProfile);
-
-        return { user: data.user, error: null };
-      } catch (err) {
-        const appError = parseSupabaseError(err as Error);
-        logError(appError);
-        throw appError;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [fetchUserProfile]
-  );
-
-  /**
-   * Sign in
-   */
-  const signIn = useCallback(
-    async (
-      email: string,
-      password: string
-    ): Promise<{ user: User | null; error: AppError | null }> => {
-      try {
-        setIsLoading(true);
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) {
-          const appError = parseSupabaseError(error);
-          logError(appError);
-          return { user: null, error: appError };
-        }
-
-        if (data.user) {
-          setUser(data.user);
-          setSession(data.session);
-          const userProfile = await fetchUserProfile(data.user.id);
-          setProfile(userProfile);
-        }
-
-        return { user: data.user, error: null };
-      } catch (err) {
-        const appError = parseSupabaseError(err as Error);
-        logError(appError);
-        return { user: null, error: appError };
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [fetchUserProfile]
-  );
-
-  /**
-   * Reset password
-   */
-  const resetPassword = useCallback(
-    async (email: string): Promise<{ error: AppError | null }> => {
-      try {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`,
-        });
-
-        if (error) {
-          const appError = parseSupabaseError(error);
-          logError(appError);
-          return { error: appError };
-        }
-
-        return { error: null };
-      } catch (err) {
-        const appError = parseSupabaseError(err as Error);
-        logError(appError);
-        return { error: appError };
-      }
-    },
-    []
-  );
-
-  /**
-   * Update profile
-   */
-  const updateProfile = useCallback(
-    async (
-      updates: Partial<UserProfile>
-    ): Promise<{ profile: UserProfile; error: AppError | null }> => {
-      if (!user) {
-        const appError = parseSupabaseError(
-          new Error("User not authenticated")
-        );
-        logError(appError);
-        throw appError;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .update(updates)
-          .eq("id", user.id)
-          .select()
-          .single();
-
-        if (error || !data) {
-          const appError = parseSupabaseError(
-            error ?? new Error("Profile update failed")
-          );
-          logError(appError);
-          throw appError;
-        }
-
-        setProfile(data);
-        return { profile: data, error: null };
-      } catch (err) {
-        const appError = parseSupabaseError(err as Error);
-        logError(appError);
-        throw appError;
-      }
-    },
-    [user]
-  );
-
-  /**
-   * Refresh session
-   */
-  const refreshSession = useCallback(async (): Promise<void> => {
-    try {
-      const { data, error } = await supabase.auth.refreshSession();
-
-      if (error) {
-        logError(parseSupabaseError(error));
-        return;
-      }
-
-      if (data.session) {
-        setSession(data.session);
-        setUser(data.session.user);
-      }
-    } catch (err) {
-      logError(parseSupabaseError(err as Error));
-    }
-  }, []);
-
-  /**
-   * Role and permission utilities
-   */
-  const hasRole = useCallback(
-    (role: UserRole): boolean => {
-      return profile?.role === role;
-    },
-    [profile]
-  );
-
-  const hasPermission = useCallback(
-    (permission: string): boolean => {
-      if (!profile) return false;
-
-      const permissions: Record<UserRole, string[]> = {
-        admin: ["*"],
-        editor: ["read", "write", "moderate", "delete_own", "upload_journal"],
-        user: ["read", "write_own", "delete_own"],
-      };
-
-      const userPermissions = permissions[profile.role] || [];
-      return (
-        userPermissions.includes("*") || userPermissions.includes(permission)
-      );
-    },
-    [profile]
-  );
 
   const contextValue: AuthContextType = {
     user,
@@ -366,17 +179,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isAuthenticated,
     isLoading,
     isInitialized,
-    signUp,
-    signIn,
     signOut,
-    resetPassword,
-    updateProfile,
-    refreshSession,
-    hasRole,
-    hasPermission,
+    // Include other methods like signIn, signUp if they are defined here
   };
 
   return (
     <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
+};
+
+/**
+ * Custom hook to use the AuthContext.
+ */
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 };

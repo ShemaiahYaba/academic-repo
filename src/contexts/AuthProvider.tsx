@@ -118,9 +118,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
 
         // Allow small delay for trigger to insert profile
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        const userProfile = await fetchUserProfile(data.user.id);
+        let userProfile = null;
+        for (let i = 0; i < 3; i++) {
+          userProfile = await fetchUserProfile(data.user.id);
+          if (userProfile) break;
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
         setProfile(userProfile);
 
         return { user: data.user, error: null };

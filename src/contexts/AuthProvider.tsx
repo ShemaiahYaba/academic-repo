@@ -4,6 +4,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useRef,
   createContext,
   useContext,
 } from "react";
@@ -27,6 +28,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+  const lastUserIdRef = useRef<string | null>(null);
 
   const navigate = useNavigate();
   const isAuthenticated = !!user && !!profile;
@@ -180,67 +182,61 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     [profile]
   );
 
-  // 🔹 Initialize authentication
-  useEffect(() => {
-    const initializeAuth = async () => {
-      setIsLoading(true);
-
-      const {
-        data: { session: initialSession },
-      } = await supabase.auth.getSession();
-
-      if (initialSession?.user) {
-        const userProfile = await fetchUserProfile(initialSession.user.id);
-        if (userProfile) {
-          setUser(initialSession.user);
-          setProfile(userProfile);
-          setSession(initialSession);
-        } else {
-          await signOut();
-        }
+  // 🔹 Centralized session/profile handler
+  const handleSessionChange = useCallback(
+    async (newSession: Session | null) => {
+      if (!newSession?.user) {
+        setUser(null);
+        setProfile(null);
+        setSession(null);
+        lastUserIdRef.current = null;
+        setIsInitialized(true);
+        setIsLoading(false);
+        return;
       }
-
+      // Avoid duplicate work
+      if (lastUserIdRef.current === newSession.user.id) {
+        setIsInitialized(true);
+        setIsLoading(false);
+        return;
+      }
+      setIsLoading(true);
+      const userProfile = await fetchUserProfile(newSession.user.id);
+      if (userProfile) {
+        setUser(newSession.user);
+        setProfile(userProfile);
+        setSession(newSession);
+        lastUserIdRef.current = newSession.user.id;
+      } else {
+        await signOut();
+      }
       setIsInitialized(true);
       setIsLoading(false);
-    };
+    },
+    [fetchUserProfile, signOut]
+  );
 
-    initializeAuth();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      console.log(`Auth event: ${event}`);
-      setIsLoading(true);
-
-      if (event === "SIGNED_IN" && newSession?.user) {
-        const userProfile = await fetchUserProfile(newSession.user.id);
-        if (userProfile) {
-          setUser(newSession.user);
-          setProfile(userProfile);
-          setSession(newSession);
-        } else {
-          await signOut();
-        }
-      } else if (event === "SIGNED_OUT") {
-        await signOut();
-      } else if (event === "TOKEN_REFRESHED" && newSession?.user) {
-        const userProfile = await fetchUserProfile(newSession.user.id);
-        if (userProfile) {
-          setUser(newSession.user);
-          setProfile(userProfile);
-          setSession(newSession);
-        } else {
-          await signOut();
+  // 🔹 Initialize authentication
+  useEffect(() => {
+    let isMounted = true;
+    setIsLoading(true);
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      if (isMounted) {
+        handleSessionChange(initialSession);
+      }
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, newSession) => {
+        if (isMounted) {
+          await handleSessionChange(newSession);
         }
       }
-
-      setIsLoading(false);
-    });
-
+    );
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
-  }, [fetchUserProfile, signOut]);
+  }, [handleSessionChange]);
 
   const contextValue: AuthContextType = {
     user,

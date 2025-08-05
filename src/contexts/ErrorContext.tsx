@@ -26,6 +26,8 @@ export const ErrorProvider = ({ children }: ErrorProviderProps) => {
       id: generateErrorId(),
       timestamp: new Date(),
       retryCount: 0,
+      maxRetries: error.maxRetries ?? 3, // Default to 3 retries
+      retryable: error.retryable ?? true, // Default to retryable
     };
 
     setErrors(prev => [...prev, newError]);

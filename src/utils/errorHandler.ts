@@ -219,12 +219,12 @@ export function generateErrorId(): string {
 }
 
 export function shouldRetryError(error: AppError): boolean {
-  return error.retryable && error.retryCount < error.maxRetries;
+  return (error.retryable ?? true) && (error.retryCount ?? 0) < (error.maxRetries ?? 3);
 }
 
 export function getRetryDelay(error: AppError): number {
   // Exponential backoff: 1s, 2s, 4s, 8s, etc.
-  return Math.min(1000 * Math.pow(2, error.retryCount), 30000);
+  return Math.min(1000 * Math.pow(2, error.retryCount ?? 0), 30000);
 }
 
 export function categorizeError(error: Error): ErrorCategory {

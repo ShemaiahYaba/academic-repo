@@ -14,8 +14,8 @@ export const AuthStatus: React.FC = () => {
     refreshSession,
     hasRole 
   } = useAuth();
-  const { success, error: showError } = useNotification();
-  const { setLoading } = useUI();
+  const { success, error: showError } = useNotification() ?? {};
+  const { setLoading } = useUI() ?? {};
 
   const handleRefreshSession = async () => {
     setLoading(true);

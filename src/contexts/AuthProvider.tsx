@@ -163,9 +163,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   );
 
   const hasPermission = useCallback(
-    (permission: string) => {
-      // Extend this logic as needed
-      return profile?.role === "admin"; // Example: only admin has all permissions
+    (_permission: string): boolean => {
+      if (!profile) return false;
+
+      const permissions: Record<UserRole, string[]> = {
+        admin: ["*"],
+        editor: ["read", "write", "moderate", "delete_own", "upload_journal"],
+        user: ["read", "write_own", "delete_own"],
+      };
+
+      const userPermissions = permissions[profile.role] || [];
+      return (
+        userPermissions.includes("*") || userPermissions.includes(_permission)
+      );
     },
     [profile]
   );

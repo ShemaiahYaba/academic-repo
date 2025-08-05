@@ -7,6 +7,7 @@ import { ProfileImageUpload } from "@/components/ProfileImageUpload";
 import { marginLineHorizontal } from "@/constants/images";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import type { Database } from "@/types/supabase";
+import { ProfileForm } from "./ProfileForm";
 
 const DEFAULT_PROFILE_IMAGE = "https://via.placeholder.com/150";
 
@@ -22,7 +23,16 @@ const Profile: React.FC = () => {
     DEFAULT_PROFILE_IMAGE
   );
   const [formData, setFormData] = useState({
-    fullName: "",
+    firstName: "",
+    lastName: "",
+    middlename: "",
+    fullName:"",
+    mobileNumber: "",
+    bio: "",
+    school: "",
+    degree: "",
+    fieldOfStudy: "",
+    researchField: "",
     email: "",
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -46,10 +56,21 @@ const Profile: React.FC = () => {
         if (error) throw error;
 
         if (data) {
-          setFormData({
+          setFormData(prev => ({
+            ...prev,
             fullName: data.full_name || "",
             email: data.email || user.email || "",
-          });
+            // Map other fields if available in data
+            firstName: data.first_name || "",
+            lastName: data.last_name || "",
+            middlename: data.middlename || "",
+            mobileNumber: data.mobile_number || "",
+            bio: data.bio || "",
+            school: data.school || "",
+            degree: data.degree || "",
+            fieldOfStudy: data.field_of_study || "",
+            researchField: data.research_field || "",
+          }));
           setProfileImage(data.avatar_url || DEFAULT_PROFILE_IMAGE);
         }
       } catch (error) {
@@ -65,7 +86,7 @@ const Profile: React.FC = () => {
 
   // Handle field input change
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -124,46 +145,13 @@ const Profile: React.FC = () => {
         />
         <img className="py-4" src={marginLineHorizontal} alt="Divider" />
         
-        {/* Simple Profile Form */}
+        {/* Profile Form */}
         <div className="w-full max-w-md">
-          <form onSubmit={handleSaveProfile} className="space-y-4">
-            <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name
-              </label>
-              <input
-                type="text"
-                id="fullName"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your full name"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your email"
-              />
-            </div>
-            
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Save Profile
-            </button>
-          </form>
+          <ProfileForm
+            formData={formData}
+            handleChange={handleInputChange}
+            handleSubmit={handleSaveProfile}
+          />
         </div>
       </div>
     </div>

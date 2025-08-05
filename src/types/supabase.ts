@@ -11,6 +11,15 @@ export interface Database {
     Tables: {
       profiles: {
         Row: {
+          first_name: string
+          last_name: string
+          middlename: string
+          mobile_number: string
+          bio: string
+          school: string
+          degree: string
+          field_of_study: string
+          research_field: string
           id: string
           email: string
           full_name: string | null

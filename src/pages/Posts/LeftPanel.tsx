@@ -1,7 +1,7 @@
 import React from "react";
 import PopularAuthors from "@/pages/Posts/PopularAuthors";
 import UserCard from "@/pages/Posts/UserCard";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthProvider";
 
 const LeftPanel: React.FC = () => {
   const { user } = useAuth();

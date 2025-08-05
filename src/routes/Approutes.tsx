@@ -1,7 +1,7 @@
 // routes/AppRoutes.tsx
 import { Suspense } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthProvider";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import ProtectedRoutes from "@/routes/ProtectedRoutes";
 import PublicRoutes from "@/routes/PublicRoutes";

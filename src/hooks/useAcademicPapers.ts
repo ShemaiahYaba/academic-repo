@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useSupabase } from './useSupabase';
 import { useData } from '@/contexts/DataContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthProvider';
 import type { Database } from '@/types/supabase';
 
 type AcademicPaper = Database['public']['Tables']['academic_papers']['Row'];

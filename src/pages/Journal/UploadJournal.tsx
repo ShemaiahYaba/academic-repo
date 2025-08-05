@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { db } from "@/utils/firebase";
-import { useAuth } from "@/contexts/AuthContext"; // Ensure Firebase is configured properly
+import { useAuth } from "@/contexts/AuthProvider"; // Ensure Firebase is configured properly
 import { doc, getDoc, setDoc } from "firebase/firestore"; // Import getDoc
 import { ProfileHeader } from "@/pages/Profile/ProfileHeader";
 import { JournalForm } from "@/pages/Journal/JournalForm";

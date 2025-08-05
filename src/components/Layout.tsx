@@ -1,6 +1,6 @@
 // components/Layout.tsx
 import React from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthProvider";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import LogoutButton from "@/components/LogoutButton";

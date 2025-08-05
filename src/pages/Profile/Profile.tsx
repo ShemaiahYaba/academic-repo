@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthProvider";
 import { useNotification } from "@/contexts/NotificationContext";
 import { useUI } from "@/contexts/UIContext";
 import { useSupabase } from "@/hooks/useSupabase";

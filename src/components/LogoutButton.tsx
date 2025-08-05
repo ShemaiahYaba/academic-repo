@@ -1,7 +1,7 @@
 // components/LogoutButton.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthProvider";
 import { useNotification } from "@/contexts/NotificationContext";
 import { useUI } from "@/contexts/UIContext";
 import { LoadingSpinner } from "@/components/LoadingSpinner";

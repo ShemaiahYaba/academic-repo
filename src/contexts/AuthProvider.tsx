@@ -174,73 +174,62 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   );
 
   // Handle session changes
+  // Robust session/profile handler: always resolves isInitialized
   const handleSessionChange = useCallback(
     async (newSession: Session | null) => {
-      if (!newSession?.user) {
-        setUser(null);
-        setProfile(null);
-        setSession(null);
-        lastUserIdRef.current = null;
+      try {
+        if (!newSession?.user) {
+          setUser(null);
+          setProfile(null);
+          setSession(null);
+          lastUserIdRef.current = null;
+          setIsInitialized(true);
+          setIsLoading(false);
+          return;
+        }
+        // Avoid duplicate fetch
+        if (lastUserIdRef.current === newSession.user.id) {
+          setIsInitialized(true);
+          setIsLoading(false);
+          return;
+        }
+        setIsLoading(true);
+        const userProfile = await fetchUserProfile(newSession.user.id);
+        if (userProfile) {
+          setUser(newSession.user);
+          setProfile(userProfile);
+          setSession(newSession);
+          lastUserIdRef.current = newSession.user.id;
+        } else {
+          setUser(null);
+          setProfile(null);
+          setSession(null);
+          lastUserIdRef.current = null;
+        }
+      } finally {
         setIsInitialized(true);
         setIsLoading(false);
-        return;
       }
-
-      // Avoid duplicate fetch
-      if (lastUserIdRef.current === newSession.user.id) {
-        setIsInitialized(true);
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      const userProfile = await fetchUserProfile(newSession.user.id);
-      if (userProfile) {
-        setUser(newSession.user);
-        setProfile(userProfile);
-        setSession(newSession);
-        lastUserIdRef.current = newSession.user.id;
-      } else {
-        await signOut();
-      }
-      setIsInitialized(true);
-      setIsLoading(false);
     },
-    [fetchUserProfile, signOut]
+    [fetchUserProfile]
   );
 
   // Initialize authentication
   useEffect(() => {
     let isMounted = true;
-
-    const initAuth = async () => {
-      setIsLoading(true);
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-
+    setIsLoading(true);
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       if (isMounted) {
-        if (initialSession) {
-          await handleSessionChange(initialSession);
-        } else {
-          // No session but mark init complete
-          setUser(null);
-          setProfile(null);
-          setSession(null);
-          setIsInitialized(true);
-          setIsLoading(false);
-        }
+        handleSessionChange(initialSession);
       }
-    };
-
-    initAuth();
-
+    });
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, newSession) => {
         if (isMounted) {
-          await handleSessionChange(newSession);
+          handleSessionChange(newSession);
         }
       }
     );
-
     return () => {
       isMounted = false;
       subscription.unsubscribe();

@@ -1,5 +1,4 @@
 // src/contexts/AuthProvider.tsx
-
 import {
   useEffect,
   useState,
@@ -14,9 +13,7 @@ import type { AuthContextType, UserProfile, AppError, UserRole } from "@/types/g
 import { parseSupabaseError, logError } from "@/utils/errorHandler";
 import { useNavigate } from "react-router-dom";
 
-export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined
-);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -33,7 +30,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const navigate = useNavigate();
   const isAuthenticated = !!user && !!profile;
 
-  // 🔹 Clears browser cache to avoid stale sessions
+  // Clear browser session cache
   const clearBrowserCache = useCallback(() => {
     console.log("Clearing all browser session cache...");
     localStorage.clear();
@@ -41,7 +38,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     indexedDB.deleteDatabase("supabase.auth.token");
   }, []);
 
-  // 🔹 Handles sign out completely
+  // Sign out user completely
   const signOut = useCallback(async () => {
     try {
       await supabase.auth.signOut();
@@ -56,7 +53,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [clearBrowserCache, navigate]);
 
-  // 🔹 Fetch user profile from DB
+  // Fetch user profile
   const fetchUserProfile = useCallback(async (userId: string) => {
     try {
       const { data, error, status } = await supabase
@@ -73,36 +70,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, []);
 
-  // 🔹 Sign up new user
+  // Sign up new user
   const signUp = useCallback(async (email: string, password: string) => {
     try {
       const { data, error } = await supabase.auth.signUp({ email, password });
-      if (error) {
-        return { user: null, error: parseSupabaseError(error) };
-      }
+      if (error) return { user: null, error: parseSupabaseError(error) };
       return { user: data.user ?? null, error: null };
     } catch (err) {
       return { user: null, error: parseSupabaseError(err as Error) };
     }
   }, []);
 
-  // 🔹 Sign in existing user
+  // Sign in existing user
   const signIn = useCallback(async (email: string, password: string) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      if (error) {
-        return { user: null, error: parseSupabaseError(error) };
-      }
+      if (error) return { user: null, error: parseSupabaseError(error) };
       return { user: data.user ?? null, error: null };
     } catch (err) {
       return { user: null, error: parseSupabaseError(err as Error) };
     }
   }, []);
 
-  // 🔹 Reset password
+  // Reset password
   const resetPassword = useCallback(async (email: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email);
@@ -112,7 +105,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, []);
 
-  // 🔹 Update user profile
+  // Update user profile
   const updateProfile = useCallback(
     async (updates: Partial<UserProfile>) => {
       if (!user) {
@@ -137,9 +130,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           .select()
           .single();
 
-        if (error) {
-          return { profile: null, error: parseSupabaseError(error) };
-        }
+        if (error) return { profile: null, error: parseSupabaseError(error) };
         setProfile(data);
         return { profile: data as UserProfile, error: null };
       } catch (err) {
@@ -149,7 +140,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     [user]
   );
 
-  // 🔹 Refresh session manually
+  // Refresh session manually
   const refreshSession = useCallback(async () => {
     const { data, error } = await supabase.auth.refreshSession();
     if (!error && data.session) {
@@ -158,7 +149,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, []);
 
-  // 🔹 Role-based access controlz
+  // Role-based permissions
   const hasRole = useCallback(
     (role: string) => profile?.role === role,
     [profile]
@@ -182,7 +173,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     [profile]
   );
 
-  // 🔹 Centralized session/profile handler
+  // Handle session changes
   const handleSessionChange = useCallback(
     async (newSession: Session | null) => {
       if (!newSession?.user) {
@@ -194,12 +185,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setIsLoading(false);
         return;
       }
-      // Avoid duplicate work
+
+      // Avoid duplicate fetch
       if (lastUserIdRef.current === newSession.user.id) {
         setIsInitialized(true);
         setIsLoading(false);
         return;
       }
+
       setIsLoading(true);
       const userProfile = await fetchUserProfile(newSession.user.id);
       if (userProfile) {
@@ -216,15 +209,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     [fetchUserProfile, signOut]
   );
 
-  // 🔹 Initialize authentication
+  // Initialize authentication
   useEffect(() => {
     let isMounted = true;
-    setIsLoading(true);
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+
+    const initAuth = async () => {
+      setIsLoading(true);
+      const { data: { session: initialSession } } = await supabase.auth.getSession();
+
       if (isMounted) {
-        handleSessionChange(initialSession);
+        if (initialSession) {
+          await handleSessionChange(initialSession);
+        } else {
+          // No session but mark init complete
+          setUser(null);
+          setProfile(null);
+          setSession(null);
+          setIsInitialized(true);
+          setIsLoading(false);
+        }
       }
-    });
+    };
+
+    initAuth();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, newSession) => {
         if (isMounted) {
@@ -232,6 +240,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
       }
     );
+
     return () => {
       isMounted = false;
       subscription.unsubscribe();
@@ -256,7 +265,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   return (
-    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 

@@ -61,16 +61,18 @@ export const ProtectedRoute = ({
  */
 const AccessDenied = ({ message }: { message: string }) => {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center max-w-md p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
-          Access Denied
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400">{message}</p>
-        <p className="mt-4 text-sm text-gray-500 dark:text-gray-500">
-          If you believe this is an error, please contact the administrator.
-        </p>
-      </div>
+    <div className="flex flex-col items-center justify-center min-h-[60vh]">
+      <h2 className="text-2xl font-semibold text-red-600 mb-4">Access Denied</h2>
+      <p className="mb-2 text-gray-700">{message}</p>
+      <p className="mb-6 text-gray-500 text-sm">
+        If you believe this is an error, please contact the administrator.
+      </p>
+      <button
+        onClick={() => window.history.back()}
+        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition mb-2"
+      >
+        Go Back
+      </button>
     </div>
   );
 };

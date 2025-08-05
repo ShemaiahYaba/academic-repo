@@ -45,6 +45,18 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
             value={formData.lastName}
             onChange={handleChange}
           />
+          <div className="col-span-1 md:col-span-2">
+            <label htmlFor="bio" className="block text-sm font-medium text-gray-700">Bio</label>
+            <textarea
+              id="bio"
+              name="bio"
+              value={formData.bio}
+              onChange={handleChange}
+              rows={4}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              placeholder="Tell us about yourself..."
+            />
+          </div>
           <InputField
             label="Middle Name"
             id="middlename"

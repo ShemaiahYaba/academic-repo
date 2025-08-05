@@ -36,7 +36,7 @@ const protectedRoutesConfig: {
   { path: "/notifications", element: <Notification /> },
   { path: "/profile", element: <Profile /> },
   { path: "/support", element: <Support /> },
-  { path: "/upload-journal", element: <UploadJournal />, requiredRole: "editor" },
+  { path: "/upload-journal", element: <UploadJournal /> },
 ];
 
 

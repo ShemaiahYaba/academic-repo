@@ -10,8 +10,8 @@ type AcademicPaperUpdate = Database['public']['Tables']['academic_papers']['Upda
 
 export const useAcademicPapers = () => {
   const { supabase, query, mutate } = useSupabase();
-  const { subscribe, unsubscribe } = useData();
-  const { user, hasPermission } = useAuth();
+  const { subscribe, unsubscribe } = useData() ?? {};
+  const { user, hasPermission } = useAuth() ?? {};
 
   // Fetch all papers
   const fetchPapers = useCallback(async () => {
@@ -54,7 +54,7 @@ export const useAcademicPapers = () => {
       throw new Error('User must be authenticated to create papers');
     }
 
-    if (!hasPermission('write_own')) {
+    if (!hasPermission || !hasPermission('write_own')) {
       throw new Error('Insufficient permissions to create papers');
     }
 
@@ -81,7 +81,7 @@ export const useAcademicPapers = () => {
       throw new Error('Paper not found');
     }
 
-    if (paper.user_id !== user.id && !hasPermission('write')) {
+    if (paper.user_id !== user.id && (!hasPermission || !hasPermission('write'))) {
       throw new Error('Insufficient permissions to update this paper');
     }
 
@@ -109,7 +109,7 @@ export const useAcademicPapers = () => {
       throw new Error('Paper not found');
     }
 
-    if (paper.user_id !== user.id && !hasPermission('delete')) {
+    if (paper.user_id !== user.id && (!hasPermission || !hasPermission('delete'))) {
       throw new Error('Insufficient permissions to delete this paper');
     }
 
@@ -175,6 +175,7 @@ export const useAcademicPapers = () => {
 
   // Subscribe to real-time updates
   const subscribeToPapers = useCallback((callback: (payload: any) => void) => {
+    if (!subscribe) return undefined;
     const subscriptionId = subscribe(
       'academic_papers',
       '*',
@@ -191,6 +192,7 @@ export const useAcademicPapers = () => {
 
   // Subscribe to user's papers
   const subscribeToUserPapers = useCallback((userId: string, callback: (payload: any) => void) => {
+    if (!subscribe) return undefined;
     const subscriptionId = subscribe(
       'academic_papers',
       '*',

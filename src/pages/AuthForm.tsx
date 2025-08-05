@@ -10,8 +10,8 @@ import React from "react";
 const AuthForm = () => {
   const navigate = useNavigate();
   const { signUp, signIn, resetPassword, isLoading } = useAuth();
-  const { success, error: showError } = useNotification();
-  const { setLoading } = useUI();
+  const { success, error: showError } = useNotification() ?? {};
+  const { setLoading } = useUI() ?? {};
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [isSignUp, setIsSignUp] = useState(true);
@@ -22,9 +22,12 @@ const AuthForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setLoading(true);
+    if (setLoading) setLoading(true);
 
     try {
+      if (!signUp || !signIn || !success || !showError) {
+        throw new Error("Required context functions are not available");
+      }
       if (isSignUp) {
         console.log("Attempting sign up with:", form.email);
         const result = await signUp(form.email, form.password);
@@ -67,28 +70,33 @@ const AuthForm = () => {
 
   const handlePasswordReset = async () => {
     if (!form.email) {
-      showError(
-        "Email Required",
-        "Please provide your email address to reset your password."
-      );
+      if (showError) {
+        showError(
+          "Email Required",
+          "Please provide your email address to reset your password."
+        );
+      }
       return;
     }
 
     setIsSubmitting(true);
-    setLoading(true);
+    if (setLoading) setLoading(true);
 
     try {
+      if (!resetPassword) throw new Error("Password reset function not available");
       const result = await resetPassword(form.email);
       if (result.error) {
-        showError("Password Reset Error", result.error.message);
+        if (showError) showError("Password Reset Error", result.error.message);
       } else {
-        success(
-          "Password Reset Sent",
-          "Password reset email sent! Please check your inbox."
-        );
+        if (success) {
+          success(
+            "Password Reset Sent",
+            "Password reset email sent! Please check your inbox."
+          );
+        }
       }
     } catch (err: unknown) {
-      if (err instanceof Error) {
+      if (err instanceof Error && showError) {
         showError("Password Reset Error", err.message);
       } else {
         showError(

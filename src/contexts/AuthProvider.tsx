@@ -9,7 +9,7 @@ import {
 } from "react";
 import { supabase } from "@/lib/supabase";
 import type { User, Session } from "@supabase/supabase-js";
-import type { AuthContextType, UserProfile, AppError } from "@/types/global";
+import type { AuthContextType, UserProfile, AppError, UserRole } from "@/types/global";
 import { parseSupabaseError, logError } from "@/utils/errorHandler";
 import { useNavigate } from "react-router-dom";
 
@@ -156,7 +156,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, []);
 
-  // 🔹 Role-based access control
+  // 🔹 Role-based access controlz
   const hasRole = useCallback(
     (role: string) => profile?.role === role,
     [profile]
@@ -164,7 +164,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const hasPermission = useCallback(
     (_permission: string): boolean => {
-      if (!profile) return false;
+      if (!profile || !profile.role) return false;
 
       const permissions: Record<UserRole, string[]> = {
         admin: ["*"],

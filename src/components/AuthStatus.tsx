@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthProvider';
 import { useNotification } from '@/contexts/NotificationContext';
 import { useUI } from '@/contexts/UIContext';
 import { LoadingSpinner } from './LoadingSpinner';
@@ -18,6 +18,11 @@ export const AuthStatus: React.FC = () => {
   const { setLoading } = useUI() ?? {};
 
   const handleRefreshSession = async () => {
+    if (!setLoading || !refreshSession || !success || !showError) {
+      console.warn('Required context functions not available');
+      return;
+    }
+    
     setLoading(true);
     try {
       await refreshSession();
@@ -130,7 +135,7 @@ export const AuthStatus: React.FC = () => {
                     }`}>
                       {profile.role}
                     </span>
-                    {hasRole('admin') && (
+                    {hasRole && hasRole('admin') && (
                       <span className="text-xs text-gray-500">(Admin privileges)</span>
                     )}
                   </div>

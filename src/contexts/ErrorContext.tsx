@@ -23,7 +23,7 @@ export const ErrorProvider = ({ children }: ErrorProviderProps) => {
   const addError = useCallback((error: Omit<AppError, 'id' | 'timestamp' | 'retryCount'>): string => {
     const newError: AppError = {
       ...error,
-      id: generateErrorId(),
+      id: String(generateErrorId()),
       timestamp: new Date(),
       retryCount: 0,
       maxRetries: error.maxRetries ?? 3, // Default to 3 retries
@@ -40,7 +40,8 @@ export const ErrorProvider = ({ children }: ErrorProviderProps) => {
       scheduleRetry(newError);
     }
 
-    return newError.id;
+    return newError.id ?? '';
+
   }, []);
 
   const removeError = useCallback((id: string) => {
@@ -67,7 +68,7 @@ export const ErrorProvider = ({ children }: ErrorProviderProps) => {
       if (error.id === id && shouldRetryError(error)) {
         const updatedError: AppError = {
           ...error,
-          retryCount: error.retryCount + 1,
+          retryCount: (error.retryCount ?? 0) + 1,
         };
 
         // Schedule next retry
@@ -86,11 +87,15 @@ export const ErrorProvider = ({ children }: ErrorProviderProps) => {
 
     const delay = getRetryDelay(error);
     const timeout = setTimeout(() => {
-      retryTimeoutsRef.current.delete(error.id);
-      retryError(error.id);
+      if (error.id) {
+        retryTimeoutsRef.current.delete(error.id);
+        retryError(error.id);
+      }
     }, delay);
 
-    retryTimeoutsRef.current.set(error.id, timeout);
+    if (error.id) {
+      retryTimeoutsRef.current.set(error.id, timeout);
+    }
   }, [retryError]);
 
   const getErrorsByCategory = useCallback((category: ErrorCategory): AppError[] => {

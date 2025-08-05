@@ -35,7 +35,7 @@ export const ProtectedRoute = ({
   }
 
   // Check role requirement
-  if (requiredRole && !hasRole(requiredRole)) {
+  if (requiredRole && (!hasRole || !hasRole(requiredRole))) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -51,7 +51,7 @@ export const ProtectedRoute = ({
   }
 
   // Check permission requirement
-  if (requiredPermission && !hasPermission(requiredPermission)) {
+  if (requiredPermission && (!hasPermission || !hasPermission(requiredPermission))) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
